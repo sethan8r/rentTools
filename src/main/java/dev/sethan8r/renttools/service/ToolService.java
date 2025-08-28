@@ -71,4 +71,20 @@ public class ToolService {
     public List<Tool> getByTypeAndIsAvailable(String type, Boolean isAvailable) {
         return toolRepository.findByTypeAndIsAvailable(type, isAvailable);
     }
+
+    public void takeTool(Long id) {
+        Tool tool = toolRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Инструмент с ID " + id + " не найден"));
+
+        tool.setIsAvailable(false);
+        toolRepository.save(tool);
+    }
+
+    public void returnTool(Long id) {
+        Tool tool = toolRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Инструмент с ID " + id + " не найден"));
+
+        tool.setIsAvailable(true);
+        toolRepository.save(tool);
+    }
 }

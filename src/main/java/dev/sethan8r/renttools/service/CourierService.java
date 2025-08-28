@@ -74,5 +74,68 @@ public class CourierService {
         courierRepository.save(courier);
     }
 
-    public void replacePhoneToCourier
+    public void replacePhoneToCourier(Long id, String phone) {
+        if (courierRepository.existsByPhone(phone)) {
+            throw new AlreadyExistsException("Курьер с телефоном " + phone + "существует");
+        }
+
+        Courier courier = courierRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Курьер с ID " + id + " не найден"));
+
+        courier.setPhone(phone);
+        courierRepository.save(courier);
+    }
+
+    public void replaceEmailToCourier(Long id, String email) {
+        if (courierRepository.existsByEmail(email)) {
+            throw new AlreadyExistsException("Курьер с телефоном " + email + "существует");
+        }
+
+        Courier courier = courierRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Курьер с ID " + id + " не найден"));
+
+        courier.setEmail(email);
+        courierRepository.save(courier);
+    }
+
+    public void replacePasswordToCourier(Long id, String password) {
+        Courier courier = courierRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Курьер с ID " + id + " не найден"));
+
+        courier.setPassword(passwordEncoder.encode(password));
+        courierRepository.save(courier);
+    }
+
+    public void replaceNameToCourier(Long id, String firstName) {
+        Courier courier = courierRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Курьер с ID " + id + " не найден"));
+
+        courier.setFirstName(firstName);
+        courierRepository.save(courier);
+    }
+
+    public void replaceLastNameToCourier(Long id, String lastName) {
+        Courier courier = courierRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Курьер с ID " + id + " не найден"));
+
+        courier.setLastName(lastName);
+        courierRepository.save(courier);
+    }
+
+    public void addDeliversToCourier(Long id) {
+        Courier courier = courierRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Курьер с ID " + id + " не найден"));
+
+        courier.setDelivers(courier.getDelivers() + 1);
+        courierRepository.save(courier);
+    }
+
+    public void replaceDeliversToCourier(Long id, Integer delivers) {
+        Courier courier = courierRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Курьер с ID " + id + " не найден"));
+
+        courier.setDelivers(delivers);
+        courierRepository.save(courier);
+    }
+
 }
