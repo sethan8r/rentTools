@@ -11,6 +11,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring", uses = {OrderMapper.class})
 public interface DeliveryMapper {
 
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "courier", source = "courier")
     @Mapping(target = "order", source = "order")
     Delivery toDelivery(DeliveryCreateDTO deliveryCreateDTO, Courier courier, Order order);

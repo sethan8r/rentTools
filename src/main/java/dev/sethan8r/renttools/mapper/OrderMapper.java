@@ -11,6 +11,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring", uses = {ToolMapper.class, UserMapper.class})
 public interface OrderMapper {
 
+    @Mapping(target = "id", ignore = true)
     @Mapping(target = "tool", source = "tool")
     @Mapping(target = "user", source = "user")
     Order toOrder(OrderCreatedDTO orderCreatedDTO, Tool tool, User user);

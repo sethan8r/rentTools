@@ -4,20 +4,21 @@ import dev.sethan8r.renttools.dto.OrderCreatedDTO;
 import dev.sethan8r.renttools.dto.OrderResponseDTO;
 import dev.sethan8r.renttools.exception.NotFoundException;
 import dev.sethan8r.renttools.mapper.OrderMapper;
-import dev.sethan8r.renttools.model.DeliveryStatus;
-import dev.sethan8r.renttools.model.Order;
-import dev.sethan8r.renttools.model.Tool;
-import dev.sethan8r.renttools.model.User;
+import dev.sethan8r.renttools.model.*;
 import dev.sethan8r.renttools.repository.DeliveryRepository;
 import dev.sethan8r.renttools.repository.OrderRepository;
 import dev.sethan8r.renttools.repository.ToolRepository;
 import dev.sethan8r.renttools.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Service
+@RequiredArgsConstructor
 public class OrderService {
 
     private final OrderRepository orderRepository;
@@ -26,14 +27,6 @@ public class OrderService {
     private final DeliveryRepository deliveryRepository;
     private final OrderMapper orderMapper;
 
-    public OrderService(OrderRepository orderRepository, ToolRepository toolRepository, UserRepository userRepository,
-                        DeliveryRepository deliveryRepository, OrderMapper orderMapper) {
-        this.orderRepository = orderRepository;
-        this.toolRepository = toolRepository;
-        this.userRepository = userRepository;
-        this.deliveryRepository = deliveryRepository;
-        this.orderMapper = orderMapper;
-    }
 
     public void createOrder(OrderCreatedDTO orderCreatedDTO) {
         if(orderCreatedDTO.endDate().isBefore(orderCreatedDTO.startDate()))
@@ -115,5 +108,31 @@ public class OrderService {
 
         order.setStatus(status);
         orderRepository.save(order);
+    }
+
+    public void setStatusFailedToOrderById(Long id) {
+        Order order = orderRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Заказ с ID " + id + " не найден"));
+        Delivery delivery = order.getDelivery();
+
+        order.setStatus(DeliveryStatus.FAILED);
+        delivery.setStatus(DeliveryStatus.FAILED);
+        orderRepository.save(order);
+        deliveryRepository.save(delivery);
+    }
+
+    public void setStatusCompletedToOrderById(Long id) {
+        Order order = orderRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Заказ с ID " + id + " не найден"));
+        Delivery delivery = order.getDelivery();
+
+        order.setStatus(DeliveryStatus.COMPLETED);
+        delivery.setStatus(DeliveryStatus.COMPLETED);
+        orderRepository.save(order);
+        deliveryRepository.save(delivery);
+    }
+
+    public void deleteOrder(Long id) {
+        orderRepository.deleteById(id);
     }
 }

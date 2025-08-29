@@ -9,9 +9,6 @@ import dev.sethan8r.renttools.model.Role;
 import dev.sethan8r.renttools.model.User;
 import dev.sethan8r.renttools.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -23,17 +20,6 @@ public class UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
-//    @Override
-//    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-//        User user = userRepository.findByUsername(username)
-//                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
-//
-//        return org.springframework.security.core.userdetails.User
-//                .withUsername(user.getUsername())
-//                .password(user.getPassword())
-//                .roles(user.getRole().name().replace("ROLE_", ""))
-//                .build();
-//    }
 
     public void createUser(UserCreateDTO userCreateDTO) {
         if (userRepository.existsByUsername(userCreateDTO.username())) {
