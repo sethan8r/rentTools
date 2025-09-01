@@ -12,6 +12,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.stream.Collectors;
+
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -21,6 +27,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
 
 
+    @Transactional
     public void createUser(UserCreateDTO userCreateDTO) {
         if (userRepository.existsByUsername(userCreateDTO.username())) {
             throw new AlreadyExistsException("Пользователь с логином " + userCreateDTO.username() + "существует");
@@ -41,6 +48,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
     public void replacePhoneToUser(Long id, String phone) {
         User user = userRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Пользователь с ID " + id + " не найден"));
@@ -53,6 +61,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
     public void replacePasswordToUser(Long id, String password) {
         User user = userRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Пользователь с ID " + id + " не найден"));
@@ -61,6 +70,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
     public void replaceNameToUser(Long id, String firstName) {
         User user = userRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Пользователь с ID " + id + " не найден"));
@@ -69,6 +79,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
     public void replaceLastNameToUser(Long id, String lastName) {
         User user = userRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Пользователь с ID " + id + " не найден"));
@@ -77,6 +88,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
     public void replaceEmailToUser(Long id, String email) {
         User user = userRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Пользователь с ID " + id + " не найден"));
@@ -89,6 +101,7 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
     public void replaceUsernameToUser(Long id, String username) {
         User user = userRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Пользователь с ID " + id + " не найден"));
@@ -120,5 +133,17 @@ public class UserService {
                 () -> new NotFoundException("Пользователь с телефоном " + phone + " не найден"));
 
         return userMapper.toUserResponseDTO(user);
+    }
+
+    public UserResponseDTO getUserById(Long id) {
+        User user = userRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Пользователь с ID " + id + " не найден"));
+
+        return userMapper.toUserResponseDTO(user);
+    }
+
+    public Page<UserResponseDTO> getAllUser(Pageable pageable) {
+
+        return userRepository.findAll(pageable).map(userMapper::toUserResponseDTO);
     }
 }

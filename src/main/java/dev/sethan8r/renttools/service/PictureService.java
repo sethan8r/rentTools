@@ -7,6 +7,7 @@ import dev.sethan8r.renttools.model.Picture;
 import dev.sethan8r.renttools.repository.PictureRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -26,6 +27,7 @@ public class PictureService {
                 new NotFoundException("Изображение с ID " + id + " не найден"));
     }
 
+    @Transactional
     public void createPicture(PictureCreateDTO pictureCreateDTO) {
         pictureRepository.save(pictureMapper.toPicture(pictureCreateDTO));
     }

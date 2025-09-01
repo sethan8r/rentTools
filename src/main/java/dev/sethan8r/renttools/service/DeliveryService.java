@@ -9,26 +9,25 @@ import dev.sethan8r.renttools.model.*;
 import dev.sethan8r.renttools.repository.CourierRepository;
 import dev.sethan8r.renttools.repository.DeliveryRepository;
 import dev.sethan8r.renttools.repository.OrderRepository;
-import dev.sethan8r.renttools.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
-    private final UserRepository userRepository;
     private final CourierRepository courierRepository;
     private final OrderRepository orderRepository;
     private final DeliveryMapper deliveryMapper;
 
 
-
-    public void createDelivery(DeliveryCreateDTO deliveryCreateDTO) {
+    @Transactional
+    public DeliveryResponseDTO createDelivery(DeliveryCreateDTO deliveryCreateDTO) {
         if (deliveryRepository.existsByOrderId(deliveryCreateDTO.orderId())) {
             throw new AlreadyExistsException("Доставка для этого заказа уже назначена");
         }
@@ -49,6 +48,8 @@ public class DeliveryService {
 
         deliveryRepository.save(delivery);
         orderRepository.save(order);
+
+        return deliveryMapper.toDeliveryResponseDTO(delivery);
     }
 
     public DeliveryResponseDTO getDeliveryById(Long id) {
@@ -65,30 +66,28 @@ public class DeliveryService {
         return deliveryMapper.toDeliveryResponseDTO(delivery);
     }
 
-    public List<DeliveryResponseDTO> getDeliveryByCourierId(Long id) {
+    public Page<DeliveryResponseDTO> getDeliveryByCourierId(Long id, Pageable pageable) {
         if(!courierRepository.existsById(id)) throw new NotFoundException("Курьер с ID " + id + " не найден");
 
-        return deliveryRepository.findByCourierId(id).stream()
-                .map(deliveryMapper::toDeliveryResponseDTO)
-                .collect(Collectors.toList());
+        return deliveryRepository.findByCourierId(id, pageable)
+                .map(deliveryMapper::toDeliveryResponseDTO);
     }
 
-    public List<DeliveryResponseDTO> getDeliveryByStatus(DeliveryStatus status) {
+    public Page<DeliveryResponseDTO> getDeliveryByStatus(DeliveryStatus status, Pageable pageable) {
 
-        return deliveryRepository.findByStatus(status).stream()
-                .map(deliveryMapper::toDeliveryResponseDTO)
-                .collect(Collectors.toList());
+        return deliveryRepository.findByStatus(status, pageable)
+                .map(deliveryMapper::toDeliveryResponseDTO);
     }
 
-    public List<DeliveryResponseDTO> getDeliveryByStatusAndCourierId(DeliveryStatus status, Long id) {
+    public Page<DeliveryResponseDTO> getDeliveryByStatusAndCourierId(DeliveryStatus status, Long id, Pageable pageable) {
         if(!courierRepository.existsById(id)) throw new NotFoundException("Курьер с ID " + id + " не найден");
 
-        return deliveryRepository.findByStatusAndCourierId(status, id).stream()
-                .map(deliveryMapper::toDeliveryResponseDTO)
-                .collect(Collectors.toList());
+        return deliveryRepository.findByStatusAndCourierId(status, id, pageable)
+                .map(deliveryMapper::toDeliveryResponseDTO);
     }
 
-    public void setStatusToDeliveryById(DeliveryStatus status, Long id) {
+    @Transactional
+    public void replaceStatusToDeliveryById(DeliveryStatus status, Long id) {
         Delivery delivery = deliveryRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Доставка с ID заказа " + id + " не найдена"));
 
@@ -96,18 +95,23 @@ public class DeliveryService {
         deliveryRepository.save(delivery);
     }
 
+    @Transactional
     public void setStatusDeliveredToDeliveryById(Long id) {
         Delivery delivery = deliveryRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Доставка с ID заказа " + id + " не найдена"));
         Order order = delivery.getOrder();
+        Courier courier = delivery.getCourier();
 
         delivery.setStatus(DeliveryStatus.DELIVERED);
         order.setStatus(DeliveryStatus.DELIVERED);
+        courier.setDelivers(courier.getDelivers() + 1);
 
         deliveryRepository.save(delivery);
         orderRepository.save(order);
+        courierRepository.save(courier);
     }
 
+    @Transactional
     public void setStatusCompletedToDeliveryById(Long id) {
         Delivery delivery = deliveryRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Доставка с ID заказа " + id + " не найдена"));

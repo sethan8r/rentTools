@@ -9,8 +9,11 @@ import dev.sethan8r.renttools.model.Courier;
 import dev.sethan8r.renttools.model.Role;
 import dev.sethan8r.renttools.repository.CourierRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +23,7 @@ public class CourierService {
     private final CourierMapper courierMapper;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public void createCourier(CourierCreateDTO courierCreateDTO) {
         if (courierRepository.existsByUsername(courierCreateDTO.username())) {
             throw new AlreadyExistsException("Курьер с логином " + courierCreateDTO.username() + "существует");
@@ -39,6 +43,11 @@ public class CourierService {
         courier.setRole(Role.ROLE_COURIER);
 
         courierRepository.save(courier);
+    }
+
+    public Page<CourierResponseDTO> getAllCourier(Pageable pageable) {
+
+        return courierRepository.findAll(pageable).map(courierMapper::toCourierResponseDTO);
     }
 
     public CourierResponseDTO getCourierById(Long id) {
@@ -62,6 +71,7 @@ public class CourierService {
         return courierMapper.toCourierResponseDTO(courier);
     }
 
+    @Transactional
     public void replaceUsernameToCourier(Long id, String username) {
         if (courierRepository.existsByUsername(username)) {
             throw new AlreadyExistsException("Курьер с логином " + username + "существует");
@@ -74,6 +84,7 @@ public class CourierService {
         courierRepository.save(courier);
     }
 
+    @Transactional
     public void replacePhoneToCourier(Long id, String phone) {
         if (courierRepository.existsByPhone(phone)) {
             throw new AlreadyExistsException("Курьер с телефоном " + phone + "существует");
@@ -86,6 +97,7 @@ public class CourierService {
         courierRepository.save(courier);
     }
 
+    @Transactional
     public void replaceEmailToCourier(Long id, String email) {
         if (courierRepository.existsByEmail(email)) {
             throw new AlreadyExistsException("Курьер с телефоном " + email + "существует");
@@ -98,6 +110,7 @@ public class CourierService {
         courierRepository.save(courier);
     }
 
+    @Transactional
     public void replacePasswordToCourier(Long id, String password) {
         Courier courier = courierRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Курьер с ID " + id + " не найден"));
@@ -106,6 +119,7 @@ public class CourierService {
         courierRepository.save(courier);
     }
 
+    @Transactional
     public void replaceNameToCourier(Long id, String firstName) {
         Courier courier = courierRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Курьер с ID " + id + " не найден"));
@@ -114,6 +128,7 @@ public class CourierService {
         courierRepository.save(courier);
     }
 
+    @Transactional
     public void replaceLastNameToCourier(Long id, String lastName) {
         Courier courier = courierRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Курьер с ID " + id + " не найден"));
@@ -122,6 +137,7 @@ public class CourierService {
         courierRepository.save(courier);
     }
 
+    @Transactional
     public void addDeliversToCourier(Long id) {
         Courier courier = courierRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Курьер с ID " + id + " не найден"));
@@ -130,6 +146,7 @@ public class CourierService {
         courierRepository.save(courier);
     }
 
+    @Transactional
     public void replaceDeliversToCourier(Long id, Integer delivers) {
         Courier courier = courierRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Курьер с ID " + id + " не найден"));

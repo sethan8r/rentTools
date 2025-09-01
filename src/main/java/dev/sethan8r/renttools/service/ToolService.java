@@ -11,8 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +27,7 @@ public class ToolService {
                 () -> new NotFoundException("Инструмент с ID " + id + " не найден")));
     }
 
+    @Transactional
     public void createTool(ToolCreateDTO toolCreateDTO) {
         toolRepository.save(toolMapper.toTool(toolCreateDTO));
     }
@@ -35,6 +36,7 @@ public class ToolService {
         toolRepository.deleteById(id);
     }
 
+    @Transactional
     public void replacePictureToTool(Long pictureId, Long toolId) {
         Tool tool = toolRepository.findById(toolId).orElseThrow(
                 () -> new NotFoundException("Инструмент с ID " + toolId + " не найден"));
@@ -44,6 +46,7 @@ public class ToolService {
         toolRepository.save(tool);
     }
 
+    @Transactional
     public void replacePriceToTool(Long toolId, Long price) {
         Tool tool = toolRepository.findById(toolId).orElseThrow(
                 () -> new NotFoundException("Инструмент с ID " + toolId + " не найден"));
@@ -52,26 +55,30 @@ public class ToolService {
         toolRepository.save(tool);
     }
 
-    public Page<Tool> searchToolByName(String name, Pageable pageable) {
-        return toolRepository.findByNameContainingIgnoreCase(name, pageable);
+    public Page<ToolResponseDTO> searchToolByName(String name, Pageable pageable) {
+        return toolRepository.findByNameContainingIgnoreCase(name, pageable).map(toolMapper::toToolResponseDTO);
     }
 
-    public Page<Tool> getAllTool(Pageable pageable) {
-        return toolRepository.findAllToolByAvailableDesc(pageable);
+    public Page<ToolResponseDTO> getAllTool(Pageable pageable) {
+        return toolRepository.findAllToolByAvailableDesc(pageable).map(toolMapper::toToolResponseDTO);
     }
 
-    public List<Tool> getByType(String type) {
-        return toolRepository.findByType(type);
+    public Page<ToolResponseDTO> getByType(String type, Pageable pageable) {
+        return toolRepository.findByType(type,pageable)
+                .map(toolMapper::toToolResponseDTO);
     }
 
-    public List<Tool> getByIsAvailable(Boolean isAvailable) {
-        return toolRepository.findByIsAvailable(isAvailable);
+    public Page<ToolResponseDTO> getByIsAvailable(Boolean isAvailable, Pageable pageable) {
+        return toolRepository.findByIsAvailable(isAvailable, pageable)
+                .map(toolMapper::toToolResponseDTO);
     }
 
-    public List<Tool> getByTypeAndIsAvailable(String type, Boolean isAvailable) {
-        return toolRepository.findByTypeAndIsAvailable(type, isAvailable);
+    public Page<ToolResponseDTO> getByTypeAndIsAvailable(String type, Boolean isAvailable, Pageable pageable) {
+        return toolRepository.findByTypeAndIsAvailable(type, isAvailable, pageable)
+                .map(toolMapper::toToolResponseDTO);
     }
 
+    @Transactional
     public void takeTool(Long id) {
         Tool tool = toolRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Инструмент с ID " + id + " не найден"));
@@ -80,6 +87,7 @@ public class ToolService {
         toolRepository.save(tool);
     }
 
+    @Transactional
     public void returnTool(Long id) {
         Tool tool = toolRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Инструмент с ID " + id + " не найден"));

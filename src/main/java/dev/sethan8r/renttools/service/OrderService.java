@@ -10,12 +10,12 @@ import dev.sethan8r.renttools.repository.OrderRepository;
 import dev.sethan8r.renttools.repository.ToolRepository;
 import dev.sethan8r.renttools.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,8 +27,8 @@ public class OrderService {
     private final DeliveryRepository deliveryRepository;
     private final OrderMapper orderMapper;
 
-
-    public void createOrder(OrderCreatedDTO orderCreatedDTO) {
+    @Transactional
+    public OrderResponseDTO createOrder(OrderCreatedDTO orderCreatedDTO) {
         if(orderCreatedDTO.endDate().isBefore(orderCreatedDTO.startDate()))
             throw new IllegalArgumentException("Конечная дата не может быть раньше начальной");
 
@@ -47,6 +47,8 @@ public class OrderService {
         order.setStatus(DeliveryStatus.PENDING);
         order.setFullPrice(fullPrice);
         orderRepository.save(order);
+
+        return orderMapper.toOrderResponseDTO(order);
     }
 
     public OrderResponseDTO getOrderById(Long id) {
@@ -56,41 +58,30 @@ public class OrderService {
         return orderMapper.toOrderResponseDTO(order);
     }
 
-    public List<OrderResponseDTO> getOrderByUserId(Long id) {
+    public Page<OrderResponseDTO> getOrderByUserId(Long id, Pageable pageable) {
         if(!userRepository.existsById(id)) throw new NotFoundException("Пользователь с ID " + id + " не найден");
 
-        List<Order> lOrder = orderRepository.findByUserId(id);
-
-        List<OrderResponseDTO> lOrderDTO = new ArrayList<>();
-
-        for(Order o : lOrder) {
-            lOrderDTO.add(orderMapper.toOrderResponseDTO(o));
-        }
-
-        return lOrderDTO;
+        return orderRepository.findByUserId(id, pageable).map(orderMapper::toOrderResponseDTO);
     }
 
-    public List<OrderResponseDTO> getOrderByStatus(DeliveryStatus status) {
+    public Page<OrderResponseDTO> getOrderByStatus(DeliveryStatus status, Pageable pageable) {
 
-        return orderRepository.findByStatus(status).stream()
-                .map(orderMapper::toOrderResponseDTO)
-                .collect(Collectors.toList());
+        return orderRepository.findByStatus(status, pageable)
+                .map(orderMapper::toOrderResponseDTO);
     }
 
-    public List<OrderResponseDTO> getOrderByUserIdAndDeliveryStatus(Long id, DeliveryStatus status) {
+    public Page<OrderResponseDTO> getOrderByUserIdAndDeliveryStatus(Long id, DeliveryStatus status, Pageable pageable) {
         if(!userRepository.existsById(id)) throw new NotFoundException("Пользователь с ID " + id + " не найден");
 
-        return orderRepository.findByUserIdAndDeliveryStatus(id, status).stream()
-                .map(orderMapper::toOrderResponseDTO)
-                .collect(Collectors.toList());
+        return orderRepository.findByUserIdAndDeliveryStatus(id, status, pageable)
+                .map(orderMapper::toOrderResponseDTO);
     }
 
-    public List<OrderResponseDTO> getOrderByToolId(Long id) {
+    public Page<OrderResponseDTO> getOrderByToolId(Long id, Pageable pageable) {
         if(!toolRepository.existsById(id)) throw new NotFoundException("Инструмент с ID " + id + " не найден");
 
-        return orderRepository.findByToolId(id).stream()
-                .map(orderMapper::toOrderResponseDTO)
-                .collect(Collectors.toList());
+        return orderRepository.findByToolId(id, pageable)
+                .map(orderMapper::toOrderResponseDTO);
     }
 
     public OrderResponseDTO getOrderByDeliveryId(Long id) {
@@ -102,7 +93,8 @@ public class OrderService {
         return orderMapper.toOrderResponseDTO(order);
     }
 
-    public void setOrderStatusById(Long id, DeliveryStatus status) {
+    @Transactional
+    public void replaceOrderStatusById(Long id, DeliveryStatus status) {
         Order order = orderRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Заказ с ID " + id + " не найден"));
 
@@ -110,6 +102,7 @@ public class OrderService {
         orderRepository.save(order);
     }
 
+    @Transactional
     public void setStatusFailedToOrderById(Long id) {
         Order order = orderRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Заказ с ID " + id + " не найден"));
@@ -121,6 +114,7 @@ public class OrderService {
         deliveryRepository.save(delivery);
     }
 
+    @Transactional
     public void setStatusCompletedToOrderById(Long id) {
         Order order = orderRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Заказ с ID " + id + " не найден"));
