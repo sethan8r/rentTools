@@ -12,6 +12,7 @@ import dev.sethan8r.renttools.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,8 +60,10 @@ public class OrderService {
         return orderMapper.toOrderResponseDTO(order);
     }
 
+
     public Page<OrderResponseDTO> getOrderByUserId(Long id, Pageable pageable) {
         if(!userRepository.existsById(id)) throw new NotFoundException("Пользователь с ID " + id + " не найден");
+
 
         return orderRepository.findByUserId(id, pageable).map(orderMapper::toOrderResponseDTO);
     }
