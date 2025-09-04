@@ -126,6 +126,7 @@ public class OrderService {
         Tool tool = order.getTool();
 
         tool.setIsAvailable(true);
+        System.out.println("ХХХХХХХХУУУУУУУУУЙЙЙЙЙЙЙЙЙЙЙЙ");
         order.setStatus(DeliveryStatus.COMPLETED);
         delivery.setStatus(DeliveryStatus.COMPLETED);
         orderRepository.save(order);

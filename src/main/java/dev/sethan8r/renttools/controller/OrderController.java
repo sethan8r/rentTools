@@ -25,7 +25,7 @@ public class OrderController {
         return orderService.createOrder(orderCreatedDTO);
     }
 
-    @PreAuthorize("hasAnyRole('USER', 'ADMIN') and @orderSecurityService.isOrderOwner(#id, authentication.name)") //Что-бы рандомный чел не вошел на чужой заказ
+    @PreAuthorize("hasAnyRole('ADMIN', 'COURIER') or @orderSecurityService.isOrderOwner(#id, authentication.name)") //Что-бы рандомный чел не вошел на чужой заказ
     @GetMapping("/get/{id}")
     public OrderResponseDTO getOrderById(@PathVariable Long id) {
 

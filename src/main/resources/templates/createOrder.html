@@ -376,7 +376,67 @@
     <h1 class="page-title">Оформление заказа</h1>
 
     <div id="order-content">
-        <div class="loading">Загрузка информации...</div>
+        <!-- Данные будут загружены через Thymeleaf -->
+        <div th:if="${tool == null or currentUser == null}" class="loading">Загрузка информации...</div>
+        <div th:if="${tool != null and currentUser != null}">
+            <div class="order-container">
+                <div class="tool-info-card">
+                    <div class="tool-image-container">
+                        <img th:src="${tool.picture.url}" th:alt="${tool.name}" class="tool-image"
+                             onerror="this.src='https://via.placeholder.com/800x800?text=Изображение+не+загружено'">
+                    </div>
+                    <h2 class="tool-name" th:text="${tool.name}"></h2>
+                    <p class="tool-type">Тип: <span th:text="${tool.type}"></span></p>
+                    <p class="tool-price"><span th:text="${#numbers.formatInteger(tool.price, 0, 'POINT')}"></span> ₽/сутки</p>
+                </div>
+
+                <div class="order-form-card">
+                    <h2 class="form-title">Данные для аренды</h2>
+
+                    <div class="date-row">
+                        <div class="date-col form-group">
+                            <label class="form-label">Дата начала аренды</label>
+                            <input type="text" id="start-date" class="date-input" placeholder="Выберите дату">
+                            <div id="start-date-error" class="error">Пожалуйста, выберите дату начала</div>
+                        </div>
+
+                        <div class="date-col form-group">
+                            <label class="form-label">Дата окончания аренды</label>
+                            <input type="text" id="end-date" class="date-input" placeholder="Выберите дату">
+                            <div id="end-date-error" class="error">Пожалуйста, выберите дату окончания</div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Адрес доставки</label>
+                        <input type="text" id="address" class="address-input" placeholder="Введите адрес доставки">
+                        <div id="address-error" class="error">Пожалуйста, введите адрес доставки</div>
+                    </div>
+
+                    <div class="price-calculation">
+                        <div class="price-row">
+                            <span>Стоимость за сутки:</span>
+                            <span th:text="${#numbers.formatInteger(tool.price, 0, 'POINT')}">₽</span>
+                        </div>
+                        <div class="price-row">
+                            <span>Количество дней:</span>
+                            <span id="days-count">0</span>
+                        </div>
+                        <div class="price-row total-price">
+                            <span>Итого к оплате:</span>
+                            <span id="total-price">0 ₽</span>
+                        </div>
+                    </div>
+
+                    <button id="submit-order" class="submit-btn">Оформить заказ</button>
+                </div>
+            </div>
+
+            <div id="success-message" class="success-message">
+                <h3>Заказ успешно создан!</h3>
+                <p>Перенаправление на страницу заказа...</p>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -387,119 +447,36 @@
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ru.js"></script>
 <script>
-    // Получаем ID инструмента из URL
-    const urlParams = new URLSearchParams(window.location.search);
-    const toolId = urlParams.get('id');
-    let currentTool = null;
-    let currentUser = null;
+    // Получаем данные из Thymeleaf
+    const currentTool = {
+        id: [[${tool.id}]],
+        name: '[[${tool.name}]]',
+        type: '[[${tool.type}]]',
+        price: [[${tool.price}]],
+        picture: {
+            url: '[[${tool.picture.url}]]'
+        }
+    };
+
+    const currentUser = {
+        id: [[${currentUser.id}]]
+    };
 
     // Загрузка информации при загрузке страницы
     document.addEventListener('DOMContentLoaded', () => {
-        if (toolId) {
-            loadToolAndUserData();
+        if (currentTool && currentUser) {
+            initDatePickers();
+            setupEventListeners();
         } else {
-            document.getElementById('order-content').innerHTML = '<div class="error">Ошибка: не указан ID инструмента</div>';
+            document.getElementById('order-content').innerHTML = '<div class="error">Ошибка: не удалось загрузить данные</div>';
         }
     });
-
-    // Загрузка данных инструмента и пользователя
-    async function loadToolAndUserData() {
-        try {
-            // Загрузка инструмента
-            const toolResponse = await fetch(`/api/tool/get/${toolId}`);
-
-            if (!toolResponse.ok) {
-                throw new Error('Ошибка загрузки инструмента');
-            }
-
-            currentTool = await toolResponse.json();
-
-            // Загрузка пользователя (предполагается, что есть endpoint для получения текущего пользователя)
-            // В реальном приложении здесь будет запрос к API пользователя
-            currentUser = { id: 1 }; // Заглушка, в реальном приложении будет получена с сервера
-
-            displayOrderForm();
-        } catch (error) {
-            document.getElementById('order-content').innerHTML = '<div class="error">Ошибка при загрузке данных</div>';
-        }
-    }
-
-    // Отображение формы заказа
-    function displayOrderForm() {
-        const orderContent = document.getElementById('order-content');
-
-        orderContent.innerHTML = `
-      <div class="order-container">
-        <div class="tool-info-card">
-          <div class="tool-image-container">
-            <img src="${currentTool.picture.url}" alt="${currentTool.name}" class="tool-image" onerror="this.src='https://via.placeholder.com/800x800?text=Изображение+не+загружено'">
-          </div>
-          <h2 class="tool-name">${currentTool.name}</h2>
-          <p class="tool-type">Тип: ${currentTool.type}</p>
-          <p class="tool-price">${formatPrice(currentTool.price)} ₽/сутки</p>
-        </div>
-
-        <div class="order-form-card">
-          <h2 class="form-title">Данные для аренды</h2>
-
-          <div class="date-row">
-            <div class="date-col form-group">
-              <label class="form-label">Дата начала аренды</label>
-              <input type="text" id="start-date" class="date-input" placeholder="Выберите дату">
-              <div id="start-date-error" class="error">Пожалуйста, выберите дату начала</div>
-            </div>
-
-            <div class="date-col form-group">
-              <label class="form-label">Дата окончания аренды</label>
-              <input type="text" id="end-date" class="date-input" placeholder="Выберите дату">
-              <div id="end-date-error" class="error">Пожалуйста, выберите дату окончания</div>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="form-label">Адрес доставки</label>
-            <input type="text" id="address" class="address-input" placeholder="Введите адрес доставки">
-            <div id="address-error" class="error">Пожалуйста, введите адрес доставки</div>
-          </div>
-
-          <div class="price-calculation">
-            <div class="price-row">
-              <span>Стоимость за сутки:</span>
-              <span>${formatPrice(currentTool.price)} ₽</span>
-            </div>
-            <div class="price-row">
-              <span>Количество дней:</span>
-              <span id="days-count">0</span>
-            </div>
-            <div class="price-row total-price">
-              <span>Итого к оплате:</span>
-              <span id="total-price">0 ₽</span>
-            </div>
-          </div>
-
-          <button id="submit-order" class="submit-btn">Оформить заказ</button>
-        </div>
-      </div>
-
-      <div id="success-message" class="success-message">
-        <h3>Заказ успешно создан!</h3>
-        <p>Перенаправление на страницу заказа...</p>
-      </div>
-    `;
-
-        // Инициализация календарей
-        initDatePickers();
-
-        // Назначение обработчиков событий
-        document.getElementById('submit-order').addEventListener('click', submitOrder);
-        document.getElementById('address').addEventListener('input', validateForm);
-    }
 
     // Инициализация календарей
     function initDatePickers() {
         const today = new Date();
         const minDate = new Date();
-        minDate.setDate(today.getDate() + 1); // Минимальная дата - завтра
+        minDate.setDate(today.getDate() + 1);
 
         const startDatePicker = flatpickr("#start-date", {
             locale: "ru",
@@ -509,7 +486,6 @@
                 validateForm();
                 updatePriceCalculation();
 
-                // Обновляем минимальную дату для endDate
                 if (selectedDates.length > 0) {
                     const minEndDate = new Date(selectedDates[0]);
                     minEndDate.setDate(minEndDate.getDate() + 1);
@@ -529,24 +505,46 @@
         });
     }
 
+    // Настройка обработчиков событий
+    function setupEventListeners() {
+        document.getElementById('submit-order').addEventListener('click', submitOrder);
+        document.getElementById('address').addEventListener('input', validateForm);
+
+        // Слушатели для дат
+        document.getElementById('start-date').addEventListener('change', validateForm);
+        document.getElementById('end-date').addEventListener('change', validateForm);
+    }
+
     // Обновление расчета цены
     function updatePriceCalculation() {
         const startDate = document.getElementById('start-date').value;
         const endDate = document.getElementById('end-date').value;
 
         if (startDate && endDate) {
-            const start = new Date(startDate.split('.').reverse().join('-'));
-            const end = new Date(endDate.split('.').reverse().join('-'));
-            const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+            const start = parseDate(startDate);
+            const end = parseDate(endDate);
 
-            if (days > 0) {
+            if (start && end && end > start) {
+                const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+                const totalPrice = currentTool.price * days;
+
                 document.getElementById('days-count').textContent = days;
-                document.getElementById('total-price').textContent = `${formatPrice(currentTool.price * days)} ₽`;
-            } else {
-                document.getElementById('days-count').textContent = '0';
-                document.getElementById('total-price').textContent = '0 ₽';
+                document.getElementById('total-price').textContent = formatPrice(totalPrice) + ' ₽';
+                return;
             }
         }
+
+        document.getElementById('days-count').textContent = '0';
+        document.getElementById('total-price').textContent = '0 ₽';
+    }
+
+    // Парсинг даты из формата dd.mm.yyyy
+    function parseDate(dateString) {
+        const parts = dateString.split('.');
+        if (parts.length === 3) {
+            return new Date(parts[2], parts[1] - 1, parts[0]);
+        }
+        return null;
     }
 
     // Валидация формы
@@ -573,17 +571,15 @@
             document.getElementById('end-date-error').style.display = 'none';
         }
 
-        // Проверка, что endDate после startDate
+        // Проверка корректности дат
         if (startDate && endDate) {
-            const start = new Date(startDate.split('.').reverse().join('-'));
-            const end = new Date(endDate.split('.').reverse().join('-'));
+            const start = parseDate(startDate);
+            const end = parseDate(endDate);
 
-            if (end <= start) {
+            if (start && end && end <= start) {
                 document.getElementById('end-date-error').textContent = 'Дата окончания должна быть позже даты начала';
                 document.getElementById('end-date-error').style.display = 'block';
                 isValid = false;
-            } else {
-                document.getElementById('end-date-error').style.display = 'none';
             }
         }
 
@@ -595,9 +591,7 @@
             document.getElementById('address-error').style.display = 'none';
         }
 
-        // Активация/деактивация кнопки
         submitBtn.disabled = !isValid;
-
         return isValid;
     }
 
@@ -614,20 +608,17 @@
             const endDate = document.getElementById('end-date').value;
             const address = document.getElementById('address').value;
 
-            // Форматирование дат для отправки на сервер
             const formattedStartDate = formatDateForServer(startDate);
             const formattedEndDate = formatDateForServer(endDate);
 
-            // Создание DTO для отправки
             const orderData = {
                 toolId: currentTool.id,
-                userId: currentUser.id,
+                userId: currentUser.id, // Используем реальный ID пользователя из Thymeleaf
                 startDate: formattedStartDate,
                 endDate: formattedEndDate,
                 address: address.trim()
             };
 
-            // Отправка запроса на создание заказа
             const response = await fetch('/api/order/create', {
                 method: 'POST',
                 headers: {
@@ -638,19 +629,17 @@
 
             if (response.ok) {
                 const order = await response.json();
-
-                // Показываем сообщение об успехе
                 document.getElementById('success-message').style.display = 'block';
 
-                // Перенаправление на страницу заказа через 2 секунды
                 setTimeout(() => {
-                    window.location.href = `/order?id=${order.id}`;
+                    window.location.href = '/order/all';
                 }, 2000);
             } else {
-                throw new Error('Ошибка создания заказа');
+                const error = await response.text();
+                throw new Error(error || 'Ошибка создания заказа');
             }
         } catch (error) {
-            alert('Произошла ошибка при создании заказа. Пожалуйста, попробуйте еще раз.');
+            alert('Произошла ошибка при создании заказа: ' + error.message);
             submitBtn.disabled = false;
             submitBtn.textContent = 'Оформить заказ';
         }
@@ -659,7 +648,10 @@
     // Форматирование даты для сервера (YYYY-MM-DD)
     function formatDateForServer(dateString) {
         const parts = dateString.split('.');
-        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+        if (parts.length === 3) {
+            return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+        }
+        return dateString;
     }
 
     // Форматирование цены
