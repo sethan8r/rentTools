@@ -4,6 +4,7 @@ import dev.sethan8r.renttools.dto.ToolCreateDTO;
 import dev.sethan8r.renttools.dto.ToolResponseDTO;
 import dev.sethan8r.renttools.exception.NotFoundException;
 import dev.sethan8r.renttools.mapper.ToolMapper;
+import dev.sethan8r.renttools.model.Picture;
 import dev.sethan8r.renttools.model.Tool;
 import dev.sethan8r.renttools.repository.PictureRepository;
 import dev.sethan8r.renttools.repository.ToolRepository;
@@ -29,7 +30,12 @@ public class ToolService {
 
     @Transactional
     public void createTool(ToolCreateDTO toolCreateDTO) {
-        toolRepository.save(toolMapper.toTool(toolCreateDTO));
+        Picture picture = pictureRepository.findById(toolCreateDTO.pictureId()).orElseThrow(
+                () -> new NotFoundException("Картинка с ID " + toolCreateDTO.pictureId() + " не найден"));
+        Tool tool = toolMapper.toTool(toolCreateDTO);
+        tool.setPicture(picture);
+        tool.setIsAvailable(true);
+        toolRepository.save(tool);
     }
 
     public void deleteTool(Long id) {

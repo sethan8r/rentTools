@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Возврат товара - Админка RenTool</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: #2c3e50;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 60px;
+            margin-right: 2rem;
+            transition: transform 0.3s;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-right: 1.5rem;
+        }
+
+        .nav-links a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-buttons a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            margin-left: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .login-btn {
+            background-color: #4a90e2;
+        }
+
+        .login-btn:hover {
+            background-color: #3a7bc8;
+        }
+
+        .profile-btn {
+            background-color: #27ae60;
+        }
+
+        .profile-btn:hover {
+            background-color: #219653;
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .admin-btn {
+            background-color: #9b59b6;
+        }
+
+        .admin-btn:hover {
+            background-color: #8e44ad;
+        }
+
+        .container {
+            flex: 1;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-panel {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-panel h2 {
+            color: #4a90e2;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #4a90e2;
+        }
+
+        .search-tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .search-tab {
+            padding: 0.8rem 1.5rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-weight: 500;
+            color: #6c757d;
+            transition: all 0.3s;
+        }
+
+        .search-tab.active {
+            color: #4a90e2;
+            border-bottom: 3px solid #4a90e2;
+        }
+
+        .search-form {
+            display: none;
+        }
+
+        .search-form.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .search-btn {
+            background: #4a90e2;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1rem;
+            width: 100%;
+            transition: background-color 0.3s;
+        }
+
+        .search-btn:hover {
+            background: #3a7bc8;
+        }
+
+        .results-panel {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .results-panel.active {
+            display: block;
+        }
+
+        .results-panel h2 {
+            color: #4a90e2;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #4a90e2;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+
+        .orders-table th,
+        .orders-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .orders-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .orders-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .order-row {
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .order-row:hover {
+            background-color: #e9ecef;
+        }
+
+        .status-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background-color: #ffc107;
+            color: #212529;
+        }
+
+        .status-in-progress {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .status-delivered {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .status-completed {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .status-failed {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            background-color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pagination-btn:hover {
+            background-color: #4a90e2;
+            color: white;
+            border-color: #4a90e2;
+        }
+
+        .pagination-btn.active {
+            background-color: #4a90e2;
+            color: white;
+            border-color: #4a90e2;
+        }
+
+        .pagination-select {
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-left: 1rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+        }
+
+        .footer {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: auto;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            .nav-left {
+                margin-bottom: 1rem;
+            }
+
+            .nav-links {
+                margin-bottom: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .nav-links li {
+                margin: 0.5rem;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .orders-table {
+                display: block;
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-left">
+        <a href="/">
+            <img src="/RenTool.png" alt="Логотип RenTool" class="logo">
+        </a>
+        <ul class="nav-links">
+            <li><a href="/admin" class="admin-btn">Админка</a></li>
+        </ul>
+    </div>
+    <div class="nav-right">
+        <div class="auth-buttons">
+            <a href="/login" class="login-btn" sec:authorize="!isAuthenticated()">Войти</a>
+            <a href="/profile" class="profile-btn" sec:authorize="isAuthenticated()">Профиль</a>
+            <a href="/logout" class="logout-btn" sec:authorize="isAuthenticated()">Выйти</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Поиск заказов для возврата</h1>
+        <p>Найдите заказы для изменения статуса или возврата товара</p>
+    </div>
+
+    <div class="search-panel">
+        <h2>Поиск заказов</h2>
+
+        <div class="search-tabs">
+            <button class="search-tab active" data-tab="by-id">По ID заказа</button>
+            <button class="search-tab" data-tab="by-user">По ID клиента</button>
+            <button class="search-tab" data-tab="by-user-status">По ID клиента и статусу</button>
+        </div>
+
+        <form id="search-by-id" class="search-form active">
+            <div class="form-group">
+                <label for="order-id">ID заказа</label>
+                <input type="number" id="order-id" name="orderId" required placeholder="Введите ID заказа">
+            </div>
+            <button type="submit" class="search-btn">Найти заказ</button>
+        </form>
+
+        <form id="search-by-user" class="search-form">
+            <div class="form-group">
+                <label for="user-id">ID клиента</label>
+                <input type="number" id="user-id" name="userId" required placeholder="Введите ID клиента">
+            </div>
+            <button type="submit" class="search-btn">Найти заказы</button>
+        </form>
+
+        <form id="search-by-user-status" class="search-form">
+            <div class="form-group">
+                <label for="user-id-status">ID клиента</label>
+                <input type="number" id="user-id-status" name="userId" required placeholder="Введите ID клиента">
+            </div>
+            <div class="form-group">
+                <label for="status">Статус заказа</label>
+                <select id="status" name="status" required>
+                    <option value="PENDING">PENDING</option>
+                    <option value="IN_PROGRESS">IN_PROGRESS</option>
+                    <option value="DELIVERED">DELIVERED</option>
+                    <option value="COMPLETED">COMPLETED</option>
+                    <option value="FAILED">FAILED</option>
+                </select>
+            </div>
+            <button type="submit" class="search-btn">Найти заказы</button>
+        </form>
+    </div>
+
+    <div class="results-panel" id="results-panel">
+        <h2>Результаты поиска</h2>
+
+        <table class="orders-table">
+            <thead>
+            <tr>
+                <th>ID заказа</th>
+                <th>Дата начала</th>
+                <th>Дата окончания</th>
+                <th>Статус</th>
+            </tr>
+            </thead>
+            <tbody id="orders-table-body">
+            <!-- Результаты будут загружены через JavaScript -->
+            </tbody>
+        </table>
+
+        <div class="no-results" id="no-results" style="display: none;">
+            Заказы не найдены
+        </div>
+
+        <div class="pagination" id="pagination">
+            <!-- Пагинация будет создана через JavaScript -->
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <p>© 2023 RenTool. Все права защищены.</p>
+</div>
+
+<script>
+    let currentPage = 0;
+    let totalPages = 0;
+    let pageSize = 20;
+    let currentSearchType = 'by-id';
+    let currentSearchParams = {};
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setupTabNavigation();
+        setupSearchForms();
+    });
+
+    function setupTabNavigation() {
+        const tabs = document.querySelectorAll('.search-tab');
+        const forms = document.querySelectorAll('.search-form');
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+
+                // Активируем вкладку
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                // Показываем соответствующую форму
+                forms.forEach(form => form.classList.remove('active'));
+                document.getElementById(`search-${tabId}`).classList.add('active');
+
+                currentSearchType = tabId;
+            });
+        });
+    }
+
+    function setupSearchForms() {
+        document.getElementById('search-by-id').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const orderId = document.getElementById('order-id').value;
+            await searchOrderById(orderId);
+        });
+
+        document.getElementById('search-by-user').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('user-id').value;
+            await searchOrdersByUserId(userId, 0);
+        });
+
+        document.getElementById('search-by-user-status').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('user-id-status').value;
+            const status = document.getElementById('status').value;
+            await searchOrdersByUserIdAndStatus(userId, status, 0);
+        });
+    }
+
+    async function searchOrderById(orderId) {
+        try {
+            const response = await fetch(`/api/order/get/${orderId}`);
+            if (response.ok) {
+                const order = await response.json();
+                displaySingleOrder(order);
+            } else {
+                showNoResults();
+            }
+        } catch (error) {
+            showNoResults();
+        }
+    }
+
+    async function searchOrdersByUserId(userId, page) {
+        try {
+            const response = await fetch(`/api/order/get/userId/${userId}?page=${page}&size=${pageSize}`);
+            if (response.ok) {
+                const data = await response.json();
+                displayOrders(data);
+                currentSearchParams = { type: 'user', userId: userId };
+            } else {
+                showNoResults();
+            }
+        } catch (error) {
+            showNoResults();
+        }
+    }
+
+    async function searchOrdersByUserIdAndStatus(userId, status, page) {
+        try {
+            const response = await fetch(`/api/order/get/status/id/${userId}?status=${status}&page=${page}&size=${pageSize}`);
+            if (response.ok) {
+                const data = await response.json();
+                displayOrders(data);
+                currentSearchParams = { type: 'user-status', userId: userId, status: status };
+            } else {
+                showNoResults();
+            }
+        } catch (error) {
+            showNoResults();
+        }
+    }
+
+    function displaySingleOrder(order) {
+        const tableBody = document.getElementById('orders-table-body');
+        tableBody.innerHTML = '';
+
+        const row = createOrderRow(order);
+        tableBody.appendChild(row);
+
+        document.getElementById('results-panel').classList.add('active');
+        document.getElementById('pagination').innerHTML = '';
+        document.getElementById('no-results').style.display = 'none';
+    }
+
+    function displayOrders(data) {
+        const tableBody = document.getElementById('orders-table-body');
+        tableBody.innerHTML = '';
+
+        if (data.content && data.content.length > 0) {
+            data.content.forEach(order => {
+                const row = createOrderRow(order);
+                tableBody.appendChild(row);
+            });
+
+            setupPagination(data);
+            document.getElementById('no-results').style.display = 'none';
+        } else {
+            showNoResults();
+        }
+
+        document.getElementById('results-panel').classList.add('active');
+    }
+
+    function createOrderRow(order) {
+        const row = document.createElement('tr');
+        row.className = 'order-row';
+        row.setAttribute('data-order-id', order.id);
+
+        const statusClass = getStatusClass(order.status);
+
+        row.innerHTML = `
+            <td>${order.id}</td>
+            <td>${formatDate(order.startDate)}</td>
+            <td>${formatDate(order.endDate)}</td>
+            <td><span class="status-badge ${statusClass}">${order.status}</span></td>
+        `;
+
+        row.addEventListener('click', () => {
+            window.location.href = `/admin/order/return/profile?id=${order.id}`;
+        });
+
+        return row;
+    }
+
+    function setupPagination(data) {
+        currentPage = data.number;
+        totalPages = data.totalPages;
+
+        const paginationContainer = document.getElementById('pagination');
+        paginationContainer.innerHTML = '';
+
+        // Кнопки пагинации
+        for (let i = 0; i < totalPages; i++) {
+            const pageBtn = document.createElement('button');
+            pageBtn.className = 'pagination-btn';
+            if (i === currentPage) {
+                pageBtn.classList.add('active');
+            }
+            pageBtn.textContent = i + 1;
+            pageBtn.addEventListener('click', () => {
+                loadPage(i);
+            });
+            paginationContainer.appendChild(pageBtn);
+        }
+
+        // Выбор количества элементов на странице
+        const pageSizeSelect = document.createElement('select');
+        pageSizeSelect.className = 'pagination-select';
+        pageSizeSelect.innerHTML = `
+            <option value="10" ${pageSize === 10 ? 'selected' : ''}>10</option>
+            <option value="20" ${pageSize === 20 ? 'selected' : ''}>20</option>
+            <option value="50" ${pageSize === 50 ? 'selected' : ''}>50</option>
+        `;
+        pageSizeSelect.addEventListener('change', (e) => {
+            pageSize = parseInt(e.target.value);
+            loadPage(0);
+        });
+        paginationContainer.appendChild(pageSizeSelect);
+    }
+
+    function loadPage(page) {
+        if (currentSearchParams.type === 'user') {
+            searchOrdersByUserId(currentSearchParams.userId, page);
+        } else if (currentSearchParams.type === 'user-status') {
+            searchOrdersByUserIdAndStatus(currentSearchParams.userId, currentSearchParams.status, page);
+        }
+    }
+
+    function showNoResults() {
+        document.getElementById('orders-table-body').innerHTML = '';
+        document.getElementById('pagination').innerHTML = '';
+        document.getElementById('no-results').style.display = 'block';
+        document.getElementById('results-panel').classList.add('active');
+    }
+
+    function getStatusClass(status) {
+        switch (status) {
+            case 'PENDING': return 'status-pending';
+            case 'IN_PROGRESS': return 'status-in-progress';
+            case 'DELIVERED': return 'status-delivered';
+            case 'COMPLETED': return 'status-completed';
+            case 'FAILED': return 'status-failed';
+            default: return '';
+        }
+    }
+
+    function formatDate(dateString) {
+        if (!dateString) return '-';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('ru-RU');
+    }
+</script>
+</body>
+</html>

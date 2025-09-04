@@ -58,8 +58,7 @@ public class DeliveryController {
     @GetMapping("/get/courierId/{id}/status")
     public Page<DeliveryResponseDTO> getDeliveryByStatusAndCourierId(
             @RequestParam DeliveryStatus status,@PathVariable Long id,
-            @PageableDefault(size = 20, sort = "status") Pageable pageable) {
-
+            @PageableDefault(size = 20) Pageable pageable) {
         return deliveryService.getDeliveryByStatusAndCourierId(status, id, pageable);
     }
 

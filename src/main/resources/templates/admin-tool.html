@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Создание товара - RenTool</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: #2c3e50;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 60px;
+            margin-right: 2rem;
+            transition: transform 0.3s;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-right: 1.5rem;
+        }
+
+        .nav-links a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-buttons a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            margin-left: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .login-btn {
+            background-color: #4a90e2;
+        }
+
+        .login-btn:hover {
+            background-color: #3a7bc8;
+        }
+
+        .profile-btn {
+            background-color: #27ae60;
+        }
+
+        .profile-btn:hover {
+            background-color: #219653;
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .admin-btn {
+            background-color: #9b59b6;
+        }
+
+        .admin-btn:hover {
+            background-color: #8e44ad;
+        }
+
+        .container {
+            flex: 1;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .profile-header h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .create-form {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .create-form h2 {
+            color: #4a90e2;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #4a90e2;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #4a90e2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .select-picture-btn {
+            background: #9b59b6;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 0.5rem;
+        }
+
+        .select-picture-btn:hover {
+            background: #8e44ad;
+        }
+
+        .submit-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1rem;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .submit-btn:hover {
+            background: #219653;
+        }
+
+        .submit-btn:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+
+        /* Модальное окно для выбора картинки */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 2rem;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 1000px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #4a90e2;
+        }
+
+        .modal-header h2 {
+            color: #4a90e2;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .close-btn:hover {
+            background: #c0392b;
+        }
+
+        .pictures-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .picture-item {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .picture-item:hover {
+            border-color: #4a90e2;
+            transform: translateY(-2px);
+        }
+
+        .picture-item.selected {
+            border-color: #27ae60;
+            background-color: #f8fff9;
+        }
+
+        .picture-preview {
+            width: 100px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        .picture-id {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 0.25rem;
+        }
+
+        .picture-url {
+            font-size: 0.8rem;
+            color: #495057;
+            word-break: break-all;
+        }
+
+        .modal-pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .pagination-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid #ddd;
+            background-color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pagination-btn:hover {
+            background-color: #4a90e2;
+            color: white;
+            border-color: #4a90e2;
+        }
+
+        .pagination-btn.active {
+            background-color: #4a90e2;
+            color: white;
+            border-color: #4a90e2;
+        }
+
+        .selected-picture {
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            border: 2px solid #27ae60;
+        }
+
+        .selected-picture h4 {
+            color: #27ae60;
+            margin-bottom: 0.5rem;
+        }
+
+        .selected-preview {
+            width: 100px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 1rem;
+        }
+
+        .selected-info {
+            display: flex;
+            align-items: center;
+            margin-top: 0.5rem;
+        }
+
+        .footer {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: auto;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            .nav-left {
+                margin-bottom: 1rem;
+            }
+
+            .nav-links {
+                margin-bottom: 1rem;
+            }
+
+            .pictures-grid {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+
+            .picture-preview {
+                width: 80px;
+                height: 60px;
+            }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-left">
+        <a href="/">
+            <img src="/RenTool.png" alt="Логотип RenTool" class="logo">
+        </a>
+        <ul class="nav-links">
+            <li><a href="/admin" class="admin-btn">Админка</a></li>
+        </ul>
+    </div>
+    <div class="nav-right">
+        <div class="auth-buttons">
+            <a href="/login" class="login-btn" sec:authorize="!isAuthenticated()">Войти</a>
+            <a href="/profile" class="profile-btn" sec:authorize="isAuthenticated()">Профиль</a>
+            <a href="/logout" class="logout-btn" sec:authorize="isAuthenticated()">Выйти</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="profile-header">
+        <h1>Создание товара</h1>
+    </div>
+
+    <div class="create-form">
+        <h2>Информация о товаре</h2>
+        <form id="tool-form">
+            <div class="form-group">
+                <label for="name">Название товара *</label>
+                <input type="text" id="name" name="name" required placeholder="Введите название товара">
+            </div>
+
+            <div class="form-group">
+                <label for="type">Тип товара *</label>
+                <input type="text" id="type" name="type" required placeholder="Введите тип товара">
+            </div>
+
+            <div class="form-group">
+                <label for="price">Цена *</label>
+                <input type="number" id="price" name="price" required min="1" placeholder="Введите цену товара">
+            </div>
+
+            <div class="form-group">
+                <label>Выбор картинки *</label>
+                <button type="button" class="select-picture-btn" id="select-picture-btn">
+                    Выбрать картинку
+                </button>
+
+                <div id="selected-picture-container" class="selected-picture" style="display: none;">
+                    <h4>Выбранная картинка:</h4>
+                    <div class="selected-info">
+                        <img id="selected-preview" class="selected-preview" src="" alt="Выбранная картинка">
+                        <div>
+                            <div>ID: <span id="selected-id"></span></div>
+                            <div>URL: <span id="selected-url"></span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <button type="submit" class="submit-btn" id="submit-btn" disabled>
+                Создать товар
+            </button>
+        </form>
+    </div>
+</div>
+
+<!-- Модальное окно для выбора картинки -->
+<div id="picture-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Выбор картинки</h2>
+            <button class="close-btn" id="close-modal-btn">Закрыть</button>
+        </div>
+
+        <div class="pictures-grid" id="pictures-grid">
+            <!-- Картинки будут загружены через JavaScript -->
+        </div>
+
+        <div class="modal-pagination" id="modal-pagination">
+            <!-- Пагинация будет создана через JavaScript -->
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <p>© 2023 RenTool. Все права защищены.</p>
+</div>
+
+<script>
+    let allPictures = [];
+    let selectedPictureId = null;
+    let currentModalPage = 0;
+    const modalPageSize = 12;
+
+    // Загрузка картинок при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+        loadAllPictures();
+    });
+
+    // Открытие модального окна
+    document.getElementById('select-picture-btn').addEventListener('click', () => {
+        document.getElementById('picture-modal').style.display = 'block';
+        displayPicturesInModal();
+    });
+
+    // Закрытие модального окна
+    document.getElementById('close-modal-btn').addEventListener('click', () => {
+        document.getElementById('picture-modal').style.display = 'none';
+    });
+
+    // Закрытие модального окна при клике вне его
+    window.addEventListener('click', (event) => {
+        if (event.target === document.getElementById('picture-modal')) {
+            document.getElementById('picture-modal').style.display = 'none';
+        }
+    });
+
+    // Обработка отправки формы
+    document.getElementById('tool-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+
+        const name = document.getElementById('name').value.trim();
+        const type = document.getElementById('type').value.trim();
+        const price = document.getElementById('price').value;
+
+        if (!name || !type || !price || !selectedPictureId) {
+            alert('Заполните все обязательные поля');
+            return;
+        }
+
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Создание...';
+
+        try {
+            const response = await fetch('/api/tool/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: name,
+                    type: type,
+                    price: Number(price),
+                    pictureId: selectedPictureId
+                })
+            });
+
+            if (response.ok) {
+                alert('Товар успешно создан!');
+                // Сброс формы
+                document.getElementById('tool-form').reset();
+                document.getElementById('selected-picture-container').style.display = 'none';
+                selectedPictureId = null;
+                updateSubmitButton();
+            } else {
+                alert('Ошибка при создании товара');
+            }
+        } catch (error) {
+            alert('Ошибка при создании товара');
+        } finally {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Создать товар';
+        }
+    });
+
+    // Загрузка всех картинок
+    async function loadAllPictures() {
+        try {
+            const response = await fetch('/api/picture/get/all');
+            if (response.ok) {
+                allPictures = await response.json();
+                // Сортировка по ID от большего к меньшему
+                allPictures.sort((a, b) => b.id - a.id);
+            } else {
+                alert('Ошибка при загрузке картинок');
+            }
+        } catch (error) {
+            alert('Ошибка при загрузке картинок');
+        }
+    }
+
+    // Отображение картинок в модальном окне
+    function displayPicturesInModal() {
+        const picturesGrid = document.getElementById('pictures-grid');
+        picturesGrid.innerHTML = '';
+
+        const startIndex = currentModalPage * modalPageSize;
+        const endIndex = Math.min(startIndex + modalPageSize, allPictures.length);
+        const currentPictures = allPictures.slice(startIndex, endIndex);
+
+        currentPictures.forEach(picture => {
+            const pictureItem = document.createElement('div');
+            pictureItem.className = 'picture-item';
+            if (picture.id === selectedPictureId) {
+                pictureItem.classList.add('selected');
+            }
+
+            pictureItem.innerHTML = `
+                <div class="picture-id">ID: ${picture.id}</div>
+                <img src="${picture.url}" alt="Картинка ${picture.id}" class="picture-preview">
+                <div class="picture-url">${truncateUrl(picture.url)}</div>
+            `;
+
+            pictureItem.addEventListener('click', () => {
+                selectPicture(picture);
+                document.getElementById('picture-modal').style.display = 'none';
+            });
+
+            picturesGrid.appendChild(pictureItem);
+        });
+
+        setupModalPagination();
+    }
+
+    // Настройка пагинации в модальном окне
+    function setupModalPagination() {
+        const paginationContainer = document.getElementById('modal-pagination');
+        paginationContainer.innerHTML = '';
+
+        const totalPages = Math.ceil(allPictures.length / modalPageSize);
+
+        for (let i = 0; i < totalPages; i++) {
+            const pageBtn = document.createElement('button');
+            pageBtn.className = 'pagination-btn';
+            if (i === currentModalPage) {
+                pageBtn.classList.add('active');
+            }
+            pageBtn.textContent = i + 1;
+            pageBtn.onclick = () => {
+                currentModalPage = i;
+                displayPicturesInModal();
+            };
+            paginationContainer.appendChild(pageBtn);
+        }
+    }
+
+    // Выбор картинки
+    function selectPicture(picture) {
+        selectedPictureId = picture.id;
+
+        document.getElementById('selected-preview').src = picture.url;
+        document.getElementById('selected-id').textContent = picture.id;
+        document.getElementById('selected-url').textContent = picture.url;
+        document.getElementById('selected-picture-container').style.display = 'block';
+
+        updateSubmitButton();
+    }
+
+    // Обновление состояния кнопки отправки
+    function updateSubmitButton() {
+        const name = document.getElementById('name').value.trim();
+        const type = document.getElementById('type').value.trim();
+        const price = document.getElementById('price').value;
+
+        document.getElementById('submit-btn').disabled = !(name && type && price && selectedPictureId);
+    }
+
+    // Сокращение URL для отображения
+    function truncateUrl(url, maxLength = 30) {
+        if (url.length <= maxLength) return url;
+        return url.substring(0, maxLength - 3) + '...';
+    }
+
+    // Слушатели изменений полей формы
+    document.getElementById('name').addEventListener('input', updateSubmitButton);
+    document.getElementById('type').addEventListener('input', updateSubmitButton);
+    document.getElementById('price').addEventListener('input', updateSubmitButton);
+</script>
+</body>
+</html>

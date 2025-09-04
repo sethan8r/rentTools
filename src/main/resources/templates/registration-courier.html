@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регистрация курьера</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #4a90e2;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .logo {
+            max-width: 120px;
+            height: auto;
+            margin-bottom: 15px;
+            border: 4px solid white;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            background: white;
+            padding: 8px;
+        }
+
+        h1 {
+            color: white;
+            font-size: 28px;
+            margin: 0;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-content {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: #4a90e2;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+        }
+
+        .error {
+            color: #d9534f;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        .phone-format {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(to right, #4a90e2, #63b3ed);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(74, 144, 226, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(74, 144, 226, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        #successMessage {
+            display: none;
+            background-color: #dff0d8;
+            color: #3c763d;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #errorMessage {
+            display: none;
+            background-color: #f2dede;
+            color: #a94442;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                border-radius: 10px;
+            }
+
+            .form-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <img th:src="@{/RenTool.png}" alt="Логотип RenTool" class="logo">
+        <h1>Регистрация курьера</h1>
+    </div>
+
+    <div class="form-content">
+        <form id="registrationForm">
+            <div class="form-group">
+                <label for="username">Логин *</label>
+                <input type="text" id="username" name="username" required>
+                <div class="error" id="usernameError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="firstName">Имя *</label>
+                <input type="text" id="firstName" name="firstName" required>
+                <div class="error" id="firstNameError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="lastName">Фамилия *</label>
+                <input type="text" id="lastName" name="lastName" required>
+                <div class="error" id="lastNameError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Телефон *</label>
+                <input type="tel" id="phone" name="phone" placeholder="+7(XXX)XXX-XX-XX" required>
+                <div class="phone-format">Формат: +7(XXX)XXX-XX-XX</div>
+                <div class="error" id="phoneError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" name="email" required>
+                <div class="error" id="emailError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Пароль *</label>
+                <input type="password" id="password" name="password" required>
+                <div class="error" id="passwordError"></div>
+            </div>
+
+            <button type="submit">Зарегистрировать курьера</button>
+        </form>
+
+        <div id="successMessage"></div>
+        <div id="errorMessage"></div>
+    </div>
+
+    <div class="footer">
+        © 2023 RenTool. Все права защищены.
+    </div>
+</div>
+
+<script>
+    document.getElementById('registrationForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+
+        // Скрыть предыдущие сообщения об ошибках
+        hideAllErrors();
+        document.getElementById('errorMessage').style.display = 'none';
+        document.getElementById('successMessage').style.display = 'none';
+
+        // Получение данных формы
+        const formData = {
+            username: document.getElementById('username').value,
+            firstName: document.getElementById('firstName').value,
+            lastName: document.getElementById('lastName').value,
+            phone: document.getElementById('phone').value,
+            email: document.getElementById('email').value,
+            password: document.getElementById('password').value
+        };
+
+        // Валидация номера телефона
+        const phonePattern = /^\+7\(\d{3}\)\d{3}-\d{2}-\d{2}$/;
+        if (!phonePattern.test(formData.phone)) {
+            showError('phoneError', 'Телефон должен быть в формате +7(XXX)XXX-XX-XX');
+            return;
+        }
+
+        // Валидация email
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailPattern.test(formData.email)) {
+            showError('emailError', 'Введите корректный email адрес');
+            return;
+        }
+
+        try {
+            // Отправка данных на сервер
+            const response = await fetch('/api/courier/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+
+            console.log('Status:', response.status);
+
+            // Проверяем тип контента перед парсингом
+            const contentType = response.headers.get('content-type');
+
+            if (response.status === 201) {
+                showSuccess('Курьер успешно зарегистрирован! Перенаправление в админку через 3 секунды...');
+                setTimeout(() => {
+                    window.location.href = '/admin';
+                }, 3000);
+                return;
+            }
+
+            // Если это HTML (страница ошибки), а не JSON
+            if (contentType && contentType.includes('text/html')) {
+                const responseText = await response.text();
+                console.log('HTML response received:', responseText);
+
+                if (response.status === 403 || response.status === 401) {
+                    showGeneralError('Ошибка доступа: Недостаточно прав для регистрации курьера. Требуются права администратора.');
+                } else if (response.status === 500) {
+                    showGeneralError('Ошибка сервера: Возможно, у вас недостаточно прав или произошла внутренняя ошибка.');
+                } else {
+                    showGeneralError('Произошла ошибка. Статус: ' + response.status);
+                }
+                return;
+            }
+
+            // Пытаемся парсить как JSON только если это не HTML
+            let responseData = {};
+            try {
+                const responseText = await response.text();
+                if (responseText) {
+                    responseData = JSON.parse(responseText);
+                }
+            } catch (parseError) {
+                console.error('JSON parse error:', parseError);
+                showGeneralError('Ошибка обработки ответа сервера');
+                return;
+            }
+
+            // Обработка различных статусов
+            if (response.status === 409) {
+                handleConflictError(responseData);
+            } else if (response.status === 400) {
+                handleValidationError(responseData);
+            } else if (response.status === 403 || response.status === 401) {
+                showGeneralError('Ошибка доступа: Недостаточно прав для регистрации курьера');
+            } else {
+                showGeneralError('Произошла ошибка при регистрации. Статус: ' + response.status);
+            }
+
+        } catch (error) {
+            console.error('Fetch error:', error);
+            showGeneralError('Ошибка сети или сервера: ' + error.message);
+        }
+    });
+
+    function hideAllErrors() {
+        const errorElements = document.querySelectorAll('.error');
+        errorElements.forEach(el => {
+            el.style.display = 'none';
+        });
+    }
+
+    function showError(elementId, message) {
+        const errorElement = document.getElementById(elementId);
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+    }
+
+    function showSuccess(message) {
+        const successElement = document.getElementById('successMessage');
+        successElement.textContent = message;
+        successElement.style.display = 'block';
+    }
+
+    function showGeneralError(message) {
+        const errorElement = document.getElementById('errorMessage');
+        errorElement.textContent = message;
+        errorElement.style.display = 'block';
+    }
+
+    function handleConflictError(errorData) {
+        if (errorData.message) {
+            // Показываем сообщение об ошибке с бэкенда
+            if (errorData.message.includes('логином')) {
+                showError('usernameError', errorData.message);
+            } else if (errorData.message.includes('почтой')) {
+                showError('emailError', errorData.message);
+            } else if (errorData.message.includes('телефоном')) {
+                showError('phoneError', errorData.message);
+            } else {
+                showGeneralError(errorData.message);
+            }
+        } else {
+            showGeneralError('Курьер с такими данными уже существует');
+        }
+    }
+
+    function handleValidationError(errorData) {
+        if (errorData.message) {
+            showGeneralError('Ошибка валидации: ' + errorData.message);
+        } else {
+            showGeneralError('Ошибка валидации данных');
+        }
+    }
+
+    // Маска для телефона
+    document.getElementById('phone').addEventListener('input', function(e) {
+        let value = e.target.value.replace(/\D/g, '');
+
+        if (value.startsWith('7')) {
+            value = value.substring(1);
+        }
+
+        let formattedValue = '+7(';
+
+        if (value.length > 0) {
+            formattedValue += value.substring(0, 3);
+        }
+        if (value.length > 3) {
+            formattedValue += ')' + value.substring(3, 6);
+        }
+        if (value.length > 6) {
+            formattedValue += '-' + value.substring(6, 8);
+        }
+        if (value.length > 8) {
+            formattedValue += '-' + value.substring(8, 10);
+        }
+
+        e.target.value = formattedValue;
+    });
+</script>
+</body>
+</html>

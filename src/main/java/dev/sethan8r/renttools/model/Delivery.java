@@ -17,7 +17,7 @@ public class Delivery {
     private Courier courier;
 
     @OneToOne
-    @JoinColumn(name = "order_id", nullable = false)
+    @JoinColumn(name = "order_id", nullable = false, unique = true) //добавил уникальность
     private Order order;
 
     @Column(name = "phone", nullable = false)

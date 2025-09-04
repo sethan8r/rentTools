@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Профиль доставки - RenTool</title>
+    <!-- Стили из вашего ЛК -->
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: #2c3e50;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 60px;
+            margin-right: 2rem;
+            transition: transform 0.3s;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 1rem;
+        }
+
+        .nav-links li {
+            margin-right: 0;
+        }
+
+        .nav-links a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            transition: all 0.3s;
+            background-color: #4a90e2;
+        }
+
+        .nav-links a:hover {
+            background-color: #3a7bc8;
+            transform: translateY(-2px);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-buttons a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            margin-left: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .profile-btn {
+            background-color: #27ae60;
+        }
+
+        .profile-btn:hover {
+            background-color: #219653;
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .container {
+            flex: 1;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .content-card {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 2rem;
+            transition: transform 0.3s;
+            margin-bottom: 2rem;
+        }
+
+        .content-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .content-card h2 {
+            color: #4a90e2;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #4a90e2;
+        }
+
+        /* Стили для информации о доставке */
+        .delivery-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .info-section h3 {
+            color: #4a90e2;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .info-value {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .action-buttons {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .complete-btn {
+            padding: 1rem 2rem;
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: background-color 0.3s;
+        }
+
+        .complete-btn:hover:not(:disabled) {
+            background-color: #219653;
+        }
+
+        .complete-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+
+        #loadingIndicator, #errorAlert, #successAlert {
+            text-align: center;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+
+        #loadingIndicator {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+        }
+
+        #errorAlert {
+            background-color: #ffebee;
+            color: #c62828;
+            display: none;
+        }
+
+        #successAlert {
+            background-color: #e8f5e9;
+            color: #2e7d32;
+            display: none;
+        }
+
+        .footer {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: auto;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            .nav-left {
+                margin-bottom: 1rem;
+                flex-direction: column;
+            }
+
+            .nav-links {
+                flex-direction: column;
+                width: 100%;
+                margin-bottom: 1rem;
+            }
+
+            .nav-links a {
+                text-align: center;
+                margin-bottom: 0.5rem;
+            }
+
+            .delivery-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-left">
+        <a href="/">
+            <img src="/RenTool.png" alt="Логотип RenTool" class="logo">
+        </a>
+        <ul class="nav-links">
+            <li><a href="/courier/delivery/finish">Завершенные доставки</a></li>
+            <li><a href="/courier/delivery/progress">Текущие доставки</a></li>
+            <li><a href="/courier/delivery/take">Доступные доставки</a></li>
+            <li><a href="/courier/delivery/all">Все доставки</a></li>
+        </ul>
+    </div>
+    <div class="nav-right">
+        <div class="auth-buttons">
+            <a href="/courier" class="profile-btn">Профиль</a>
+            <a href="/logout" class="logout-btn">Выйти</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Профиль доставки</h1>
+        <p>Детальная информация о выбранной доставке</p>
+    </div>
+
+    <div class="content-card">
+        <h2>Информация о доставке</h2>
+
+        <!-- Области для уведомлений -->
+        <div id="loadingIndicator">Загрузка информации о доставке...</div>
+        <div id="errorAlert">Произошла ошибка при загрузке информации о доставке.</div>
+        <div id="successAlert">Доставка успешно завершена!</div>
+
+        <!-- Контейнер для информации о доставке -->
+        <div id="deliveryInfo" style="display: none;">
+            <div class="delivery-info">
+                <div class="info-section">
+                    <h3>Основная информация</h3>
+                    <div class="info-item">
+                        <span class="info-label">ID доставки:</span>
+                        <span class="info-value" id="deliveryId">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">ID заказа:</span>
+                        <span class="info-value" id="orderId">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Статус:</span>
+                        <span class="info-value" id="orderStatus">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Дата начала аренды:</span>
+                        <span class="info-value" id="startDate">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Дата окончания аренды:</span>
+                        <span class="info-value" id="endDate">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Стоимость:</span>
+                        <span class="info-value" id="fullPrice">-</span>
+                    </div>
+                </div>
+
+                <div class="info-section">
+                    <h3>Информация об инструменте</h3>
+                    <div class="info-item">
+                        <span class="info-label">Инструмент:</span>
+                        <span class="info-value" id="toolName">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Цена в день:</span>
+                        <span class="info-value" id="toolPrice">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>Адрес доставки</h3>
+                <div class="info-item">
+                    <span class="info-label">Адрес:</span>
+                    <span class="info-value" id="deliveryAddress">-</span>
+                </div>
+            </div>
+
+            <div class="info-section">
+                <h3>Информация о клиенте</h3>
+                <div class="info-item">
+                    <span class="info-label">Имя клиента:</span>
+                    <span class="info-value" id="clientName">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Телефон клиента:</span>
+                    <span class="info-value" id="clientPhone">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Email клиента:</span>
+                    <span class="info-value" id="clientEmail">-</span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button id="completeBtn" class="complete-btn" onclick="completeDelivery()">Завершить доставку</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <p>© 2023 RenTool. Все права защищены.</p>
+</div>
+
+<script>
+    // Получаем ID доставки из URL параметров
+    const urlParams = new URLSearchParams(window.location.search);
+    const deliveryId = urlParams.get('id');
+
+    // Основная функция, запускаемая после загрузки страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        if (deliveryId) {
+            fetchDeliveryDetails(deliveryId);
+        } else {
+            document.getElementById('errorAlert').style.display = 'block';
+            document.getElementById('errorAlert').textContent = 'ID доставки не указан в URL параметрах';
+            document.getElementById('loadingIndicator').style.display = 'none';
+        }
+    });
+
+    // Функция для загрузки деталей доставки
+    async function fetchDeliveryDetails(deliveryId) {
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const errorAlert = document.getElementById('errorAlert');
+        const deliveryInfo = document.getElementById('deliveryInfo');
+
+        // Показываем индикатор загрузки и скрываем ошибку
+        loadingIndicator.style.display = 'block';
+        errorAlert.style.display = 'none';
+        deliveryInfo.style.display = 'none';
+
+        try {
+            // Вызываем API endpoint для получения деталей доставки
+            const deliveryResponse = await fetch(`/api/delivery/get/${deliveryId}`);
+
+            if (!deliveryResponse.ok) {
+                throw new Error(`Ошибка HTTP при загрузке доставки: ${deliveryResponse.status}`);
+            }
+
+            const delivery = await deliveryResponse.json();
+
+            // Получаем информацию о заказе через отдельный endpoint
+            const orderResponse = await fetch(`/api/order/get/${delivery.orderResponseDTO.id}`);
+
+            if (!orderResponse.ok) {
+                throw new Error(`Ошибка HTTP при загрузке заказа: ${orderResponse.status}`);
+            }
+
+            const order = await orderResponse.json();
+
+            // Скрываем индикатор загрузки после успешной загрузки
+            loadingIndicator.style.display = 'none';
+            deliveryInfo.style.display = 'block';
+
+            // Заполняем данные о доставке
+            document.getElementById('deliveryId').textContent = delivery.id;
+            document.getElementById('orderId').textContent = order.id;
+
+            // Отображаем статус заказа в читаемом формате
+            let orderStatusText = '';
+            switch(order.status) {
+                case 'IN_PROGRESS':
+                    orderStatusText = 'В процессе';
+                    break;
+                case 'DELIVERED':
+                    orderStatusText = 'Доставлен';
+                    break;
+                case 'PENDING':
+                    orderStatusText = 'Ожидание';
+                    break;
+                case 'CANCELLED':
+                    orderStatusText = 'Отменен';
+                    break;
+                default:
+                    orderStatusText = order.status || 'Не указан';
+            }
+            document.getElementById('orderStatus').textContent = orderStatusText;
+
+            // Форматируем даты из заказа
+            const startDate = order.startDate ? new Date(order.startDate).toLocaleDateString('ru-RU') : 'Не указана';
+            const endDate = order.endDate ? new Date(order.endDate).toLocaleDateString('ru-RU') : 'Не указана';
+
+            document.getElementById('startDate').textContent = startDate;
+            document.getElementById('endDate').textContent = endDate;
+
+            // Отображаем стоимость
+            document.getElementById('fullPrice').textContent = order.fullPrice ? `${order.fullPrice} руб.` : 'Не указана';
+
+            // Заполняем данные об инструменте (только если есть данные)
+            if (order.toolResponseDTO && order.toolResponseDTO.name) {
+                document.getElementById('toolName').textContent = order.toolResponseDTO.name;
+                document.getElementById('toolPrice').textContent = order.toolResponseDTO.price ? `${order.toolResponseDTO.price} руб./день` : 'Не указана';
+            }
+
+            // Заполняем адрес доставки из заказа
+            document.getElementById('deliveryAddress').textContent = order.address || 'Не указан';
+
+            // Заполняем данные о клиенте из заказа (только если есть данные)
+            if (order.userResponseDTO) {
+                if (order.userResponseDTO.firstName || order.userResponseDTO.lastName) {
+                    document.getElementById('clientName').textContent = `${order.userResponseDTO.firstName || ''} ${order.userResponseDTO.lastName || ''}`.trim();
+                }
+                if (order.userResponseDTO.phone) {
+                    document.getElementById('clientPhone').textContent = order.userResponseDTO.phone;
+                }
+                if (order.userResponseDTO.email) {
+                    document.getElementById('clientEmail').textContent = order.userResponseDTO.email;
+                }
+            }
+
+            // Блокируем кнопку завершения, если доставка уже завершена
+            if (delivery.status === 'DELIVERED') {
+                document.getElementById('completeBtn').disabled = true;
+                document.getElementById('completeBtn').textContent = 'Доставка завершена';
+            }
+
+        } catch (error) {
+            console.error('Ошибка при загрузке деталей доставки:', error);
+            loadingIndicator.style.display = 'none';
+            errorAlert.style.display = 'block';
+            errorAlert.textContent = `Не удалось загрузить информацию о доставке: ${error.message}`;
+        }
+    }
+
+    // Функция для завершения доставки
+    async function completeDelivery() {
+        const button = document.getElementById('completeBtn');
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
+        const originalText = button.textContent;
+
+        // Временно блокируем кнопку для избежания повторных нажатий
+        button.disabled = true;
+        button.textContent = 'Завершение...';
+        successAlert.style.display = 'none';
+        errorAlert.style.display = 'none';
+
+        try {
+            const response = await fetch(`/api/delivery/set/status/delivered/${deliveryId}`, {
+                method: 'PATCH'
+            });
+
+            if (response.ok) {
+                // Показываем сообщение об успехе
+                successAlert.style.display = 'block';
+
+                // Обновляем статус на странице
+                document.getElementById('orderStatus').textContent = 'Доставлен';
+
+                // Блокируем кнопку завершения
+                button.disabled = true;
+                button.textContent = 'Доставка завершена';
+
+            } else {
+                throw new Error(`Ошибка сервера: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Ошибка при завершении доставки:', error);
+            errorAlert.style.display = 'block';
+            errorAlert.textContent = `Не удалось завершить доставку: ${error.message}`;
+
+            // Разблокируем кнопку в случае ошибки
+            button.disabled = false;
+            button.textContent = originalText;
+        }
+    }
+</script>
+</body>
+</html>

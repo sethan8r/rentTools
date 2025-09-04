@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RenTool - Оформление заказа</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: #2c3e50;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 60px;
+            margin-right: 2rem;
+            transition: transform 0.3s;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-right: 1.5rem;
+        }
+
+        .nav-links a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-buttons a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            margin-left: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .login-btn {
+            background-color: #4a90e2;
+        }
+
+        .login-btn:hover {
+            background-color: #3a7bc8;
+        }
+
+        .profile-btn {
+            background-color: #27ae60;
+        }
+
+        .profile-btn:hover {
+            background-color: #219653;
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .container {
+            flex: 1;
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            color: #4a90e2;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: #3a7bc8;
+            text-decoration: underline;
+        }
+
+        .page-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #4a90e2;
+            display: inline-block;
+        }
+
+        .order-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .tool-info-card {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 2rem;
+        }
+
+        .tool-image-container {
+            width: 100%;
+            height: 250px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            border: 2px solid #eee;
+            margin-bottom: 1.5rem;
+        }
+
+        .tool-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .tool-name {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .tool-type {
+            color: #7f8c8d;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+
+        .tool-price {
+            font-size: 1.8rem;
+            color: #27ae60;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+
+        .order-form-card {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 2rem;
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #2c3e50;
+        }
+
+        .date-input, .address-input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .date-input:focus, .address-input:focus {
+            border-color: #4a90e2;
+            outline: none;
+        }
+
+        .date-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .date-col {
+            flex: 1;
+        }
+
+        .price-calculation {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .total-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #27ae60;
+            border-top: 2px solid #ddd;
+            padding-top: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .submit-btn {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            background-color: #3a7bc8;
+        }
+
+        .submit-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #7f8c8d;
+            margin: 3rem 0;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .success-message {
+            text-align: center;
+            background-color: #d4edda;
+            color: #155724;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            display: none;
+        }
+
+        .footer {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: auto;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            .nav-left {
+                margin-bottom: 1rem;
+            }
+
+            .nav-links {
+                margin-bottom: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .nav-links li {
+                margin: 0.5rem;
+            }
+
+            .date-row {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .order-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-left">
+        <a href="/">
+            <img src="/RenTool.png" alt="Логотип RenTool" class="logo">
+        </a>
+        <ul class="nav-links">
+            <li><a href="/catalog">Каталог</a></li>
+            <li><a href="/order/all">Заказы</a></li>
+            <li><a href="/about">О компании</a></li>
+        </ul>
+    </div>
+    <div class="nav-right">
+        <div class="auth-buttons">
+            <a href="/login" class="login-btn" sec:authorize="!isAuthenticated()">Войти</a>
+            <a href="/profile" class="profile-btn" sec:authorize="isAuthenticated()">Профиль</a>
+            <a href="/logout" class="logout-btn" sec:authorize="isAuthenticated()">Выйти</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <a href="javascript:history.back()" class="back-link">← Назад</a>
+    <h1 class="page-title">Оформление заказа</h1>
+
+    <div id="order-content">
+        <div class="loading">Загрузка информации...</div>
+    </div>
+</div>
+
+<div class="footer">
+    <p>© 2023 RenTool. Все права защищены.</p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ru.js"></script>
+<script>
+    // Получаем ID инструмента из URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const toolId = urlParams.get('id');
+    let currentTool = null;
+    let currentUser = null;
+
+    // Загрузка информации при загрузке страницы
+    document.addEventListener('DOMContentLoaded', () => {
+        if (toolId) {
+            loadToolAndUserData();
+        } else {
+            document.getElementById('order-content').innerHTML = '<div class="error">Ошибка: не указан ID инструмента</div>';
+        }
+    });
+
+    // Загрузка данных инструмента и пользователя
+    async function loadToolAndUserData() {
+        try {
+            // Загрузка инструмента
+            const toolResponse = await fetch(`/api/tool/get/${toolId}`);
+
+            if (!toolResponse.ok) {
+                throw new Error('Ошибка загрузки инструмента');
+            }
+
+            currentTool = await toolResponse.json();
+
+            // Загрузка пользователя (предполагается, что есть endpoint для получения текущего пользователя)
+            // В реальном приложении здесь будет запрос к API пользователя
+            currentUser = { id: 1 }; // Заглушка, в реальном приложении будет получена с сервера
+
+            displayOrderForm();
+        } catch (error) {
+            document.getElementById('order-content').innerHTML = '<div class="error">Ошибка при загрузке данных</div>';
+        }
+    }
+
+    // Отображение формы заказа
+    function displayOrderForm() {
+        const orderContent = document.getElementById('order-content');
+
+        orderContent.innerHTML = `
+      <div class="order-container">
+        <div class="tool-info-card">
+          <div class="tool-image-container">
+            <img src="${currentTool.picture.url}" alt="${currentTool.name}" class="tool-image" onerror="this.src='https://via.placeholder.com/800x800?text=Изображение+не+загружено'">
+          </div>
+          <h2 class="tool-name">${currentTool.name}</h2>
+          <p class="tool-type">Тип: ${currentTool.type}</p>
+          <p class="tool-price">${formatPrice(currentTool.price)} ₽/сутки</p>
+        </div>
+
+        <div class="order-form-card">
+          <h2 class="form-title">Данные для аренды</h2>
+
+          <div class="date-row">
+            <div class="date-col form-group">
+              <label class="form-label">Дата начала аренды</label>
+              <input type="text" id="start-date" class="date-input" placeholder="Выберите дату">
+              <div id="start-date-error" class="error">Пожалуйста, выберите дату начала</div>
+            </div>
+
+            <div class="date-col form-group">
+              <label class="form-label">Дата окончания аренды</label>
+              <input type="text" id="end-date" class="date-input" placeholder="Выберите дату">
+              <div id="end-date-error" class="error">Пожалуйста, выберите дату окончания</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Адрес доставки</label>
+            <input type="text" id="address" class="address-input" placeholder="Введите адрес доставки">
+            <div id="address-error" class="error">Пожалуйста, введите адрес доставки</div>
+          </div>
+
+          <div class="price-calculation">
+            <div class="price-row">
+              <span>Стоимость за сутки:</span>
+              <span>${formatPrice(currentTool.price)} ₽</span>
+            </div>
+            <div class="price-row">
+              <span>Количество дней:</span>
+              <span id="days-count">0</span>
+            </div>
+            <div class="price-row total-price">
+              <span>Итого к оплате:</span>
+              <span id="total-price">0 ₽</span>
+            </div>
+          </div>
+
+          <button id="submit-order" class="submit-btn">Оформить заказ</button>
+        </div>
+      </div>
+
+      <div id="success-message" class="success-message">
+        <h3>Заказ успешно создан!</h3>
+        <p>Перенаправление на страницу заказа...</p>
+      </div>
+    `;
+
+        // Инициализация календарей
+        initDatePickers();
+
+        // Назначение обработчиков событий
+        document.getElementById('submit-order').addEventListener('click', submitOrder);
+        document.getElementById('address').addEventListener('input', validateForm);
+    }
+
+    // Инициализация календарей
+    function initDatePickers() {
+        const today = new Date();
+        const minDate = new Date();
+        minDate.setDate(today.getDate() + 1); // Минимальная дата - завтра
+
+        const startDatePicker = flatpickr("#start-date", {
+            locale: "ru",
+            minDate: minDate,
+            dateFormat: "d.m.Y",
+            onChange: function(selectedDates, dateStr) {
+                validateForm();
+                updatePriceCalculation();
+
+                // Обновляем минимальную дату для endDate
+                if (selectedDates.length > 0) {
+                    const minEndDate = new Date(selectedDates[0]);
+                    minEndDate.setDate(minEndDate.getDate() + 1);
+                    endDatePicker.set('minDate', minEndDate);
+                }
+            }
+        });
+
+        const endDatePicker = flatpickr("#end-date", {
+            locale: "ru",
+            minDate: minDate,
+            dateFormat: "d.m.Y",
+            onChange: function() {
+                validateForm();
+                updatePriceCalculation();
+            }
+        });
+    }
+
+    // Обновление расчета цены
+    function updatePriceCalculation() {
+        const startDate = document.getElementById('start-date').value;
+        const endDate = document.getElementById('end-date').value;
+
+        if (startDate && endDate) {
+            const start = new Date(startDate.split('.').reverse().join('-'));
+            const end = new Date(endDate.split('.').reverse().join('-'));
+            const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+            if (days > 0) {
+                document.getElementById('days-count').textContent = days;
+                document.getElementById('total-price').textContent = `${formatPrice(currentTool.price * days)} ₽`;
+            } else {
+                document.getElementById('days-count').textContent = '0';
+                document.getElementById('total-price').textContent = '0 ₽';
+            }
+        }
+    }
+
+    // Валидация формы
+    function validateForm() {
+        const startDate = document.getElementById('start-date').value;
+        const endDate = document.getElementById('end-date').value;
+        const address = document.getElementById('address').value;
+        const submitBtn = document.getElementById('submit-order');
+
+        let isValid = true;
+
+        // Валидация дат
+        if (!startDate) {
+            document.getElementById('start-date-error').style.display = 'block';
+            isValid = false;
+        } else {
+            document.getElementById('start-date-error').style.display = 'none';
+        }
+
+        if (!endDate) {
+            document.getElementById('end-date-error').style.display = 'block';
+            isValid = false;
+        } else {
+            document.getElementById('end-date-error').style.display = 'none';
+        }
+
+        // Проверка, что endDate после startDate
+        if (startDate && endDate) {
+            const start = new Date(startDate.split('.').reverse().join('-'));
+            const end = new Date(endDate.split('.').reverse().join('-'));
+
+            if (end <= start) {
+                document.getElementById('end-date-error').textContent = 'Дата окончания должна быть позже даты начала';
+                document.getElementById('end-date-error').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('end-date-error').style.display = 'none';
+            }
+        }
+
+        // Валидация адреса
+        if (!address.trim()) {
+            document.getElementById('address-error').style.display = 'block';
+            isValid = false;
+        } else {
+            document.getElementById('address-error').style.display = 'none';
+        }
+
+        // Активация/деактивация кнопки
+        submitBtn.disabled = !isValid;
+
+        return isValid;
+    }
+
+    // Отправка заказа
+    async function submitOrder() {
+        if (!validateForm()) return;
+
+        const submitBtn = document.getElementById('submit-order');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Оформление...';
+
+        try {
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            const address = document.getElementById('address').value;
+
+            // Форматирование дат для отправки на сервер
+            const formattedStartDate = formatDateForServer(startDate);
+            const formattedEndDate = formatDateForServer(endDate);
+
+            // Создание DTO для отправки
+            const orderData = {
+                toolId: currentTool.id,
+                userId: currentUser.id,
+                startDate: formattedStartDate,
+                endDate: formattedEndDate,
+                address: address.trim()
+            };
+
+            // Отправка запроса на создание заказа
+            const response = await fetch('/api/order/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(orderData)
+            });
+
+            if (response.ok) {
+                const order = await response.json();
+
+                // Показываем сообщение об успехе
+                document.getElementById('success-message').style.display = 'block';
+
+                // Перенаправление на страницу заказа через 2 секунды
+                setTimeout(() => {
+                    window.location.href = `/order?id=${order.id}`;
+                }, 2000);
+            } else {
+                throw new Error('Ошибка создания заказа');
+            }
+        } catch (error) {
+            alert('Произошла ошибка при создании заказа. Пожалуйста, попробуйте еще раз.');
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Оформить заказ';
+        }
+    }
+
+    // Форматирование даты для сервера (YYYY-MM-DD)
+    function formatDateForServer(dateString) {
+        const parts = dateString.split('.');
+        return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+
+    // Форматирование цены
+    function formatPrice(price) {
+        return new Intl.NumberFormat('ru-RU').format(price);
+    }
+</script>
+</body>
+</html>

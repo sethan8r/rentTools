@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Профиль - RenTool</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .navbar {
+      background-color: #2c3e50;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+    }
+
+    .logo {
+      height: 60px;
+      margin-right: 2rem;
+      transition: transform 0.3s;
+    }
+
+    .logo:hover {
+      transform: scale(1.05);
+    }
+
+    .nav-links {
+      display: flex;
+      list-style: none;
+    }
+
+    .nav-links li {
+      margin-right: 1.5rem;
+    }
+
+    .nav-links a {
+      color: #ecf0f1;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 0.5rem 0.8rem;
+      border-radius: 4px;
+      transition: background-color 0.3s;
+    }
+
+    .nav-links a:hover {
+      background-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+    }
+
+    .auth-buttons a {
+      color: #ecf0f1;
+      text-decoration: none;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      margin-left: 1rem;
+      transition: background-color 0.3s;
+    }
+
+    .login-btn {
+      background-color: #4a90e2;
+    }
+
+    .login-btn:hover {
+      background-color: #3a7bc8;
+    }
+
+    .profile-btn {
+      background-color: #27ae60;
+    }
+
+    .profile-btn:hover {
+      background-color: #219653;
+    }
+
+    .logout-btn {
+      background-color: #e74c3c;
+    }
+
+    .logout-btn:hover {
+      background-color: #c0392b;
+    }
+
+    .container {
+      flex: 1;
+      width: 100%;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .profile-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .profile-header h1 {
+      font-size: 2.5rem;
+      color: #2c3e50;
+      margin-bottom: 1rem;
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .profile-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .info-card {
+      background-color: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      padding: 2rem;
+      transition: transform 0.3s;
+    }
+
+    .info-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .info-card h2 {
+      color: #4a90e2;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid #4a90e2;
+    }
+
+    .user-info {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .info-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #555;
+    }
+
+    .info-value {
+      color: #2c3e50;
+      font-weight: 500;
+    }
+
+    .actions-card {
+      background-color: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+      padding: 2rem;
+    }
+
+    .action-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .action-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      padding: 1rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      text-align: center;
+      text-decoration: none;
+      color: white;
+    }
+
+    .change-password { background-color: #4a90e2; }
+    .change-password:hover { background-color: #3a7bc8; }
+
+    .change-phone { background-color: #27ae60; }
+    .change-phone:hover { background-color: #219653; }
+
+    .change-email { background-color: #9b59b6; }
+    .change-email:hover { background-color: #8e44ad; }
+
+    .change-name { background-color: #f39c12; }
+    .change-name:hover { background-color: #e67e22; }
+
+    .change-username { background-color: #34495e; }
+    .change-username:hover { background-color: #2c3e50; }
+
+    .input-container {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .input-container input {
+      flex: 1;
+      padding: 0.5rem;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+
+    .confirm-btn {
+      background: #27ae60;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .confirm-btn:hover {
+      background: #219653;
+    }
+
+    .footer {
+      background-color: #2c3e50;
+      color: #ecf0f1;
+      text-align: center;
+      padding: 1.5rem;
+      margin-top: auto;
+    }
+
+    @media (max-width: 768px) {
+      .navbar {
+        flex-direction: column;
+        padding: 1rem;
+      }
+
+      .nav-left {
+        margin-bottom: 1rem;
+      }
+
+      .nav-links {
+        margin-bottom: 1rem;
+      }
+
+      .profile-content {
+        grid-template-columns: 1fr;
+      }
+
+      .action-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-left">
+    <a href="/">
+      <img src="/RenTool.png" alt="Логотип RenTool" class="logo">
+    </a>
+    <ul class="nav-links">
+      <li><a href="/catalog">Каталог</a></li>
+      <li><a href="/order/all">Заказы</a></li>
+      <li><a href="/about">О компании</a></li>
+    </ul>
+  </div>
+  <div class="nav-right">
+    <div class="auth-buttons">
+      <a href="/login" class="login-btn" sec:authorize="!isAuthenticated()">Войти</a>
+      <a href="/profile" class="profile-btn" sec:authorize="isAuthenticated()">Профиль</a>
+      <a href="/logout" class="logout-btn" sec:authorize="isAuthenticated()">Выйти</a>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="profile-header">
+    <h1>Профиль пользователя</h1>
+  </div>
+
+  <div class="profile-content">
+    <div class="info-card">
+      <h2>Личная информация</h2>
+      <div class="user-info">
+        <div class="info-item">
+          <span class="info-label">ID:</span>
+          <span class="info-value" th:text="${currentUser.id}">123</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Логин:</span>
+          <span class="info-value" th:text="${currentUser.username}">user123</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Имя:</span>
+          <span class="info-value" th:text="${currentUser.firstName}">Иван</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Фамилия:</span>
+          <span class="info-value" th:text="${currentUser.lastName}">Иванов</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Телефон:</span>
+          <span class="info-value" th:text="${currentUser.phone}">+7 (912) 345-67-89</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Email:</span>
+          <span class="info-value" th:text="${currentUser.email}">ivan@example.com</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions-card">
+      <h2>Управление профилем</h2>
+      <div class="action-buttons">
+
+        <div class="action-item">
+          <button class="action-btn change-password">Сменить пароль</button>
+          <div class="input-container hidden">
+            <input type="password" placeholder="Введите новый пароль">
+            <button class="confirm-btn">Изменить</button>
+          </div>
+        </div>
+
+        <div class="action-item">
+          <button class="action-btn change-phone">Сменить телефон</button>
+          <div class="input-container hidden">
+            <input type="text" placeholder="Введите новый телефон">
+            <button class="confirm-btn">Изменить</button>
+          </div>
+        </div>
+
+        <div class="action-item">
+          <button class="action-btn change-email">Сменить email</button>
+          <div class="input-container hidden">
+            <input type="email" placeholder="Введите новый email">
+            <button class="confirm-btn">Изменить</button>
+          </div>
+        </div>
+
+        <div class="action-item">
+          <button class="action-btn change-name">Сменить имя/фамилию</button>
+          <div class="input-container hidden">
+            <input type="text" placeholder="Введите новое имя">
+            <input type="text" placeholder="Введите новую фамилию">
+            <button class="confirm-btn">Изменить</button>
+          </div>
+        </div>
+
+        <div class="action-item">
+          <button class="action-btn change-username">Сменить логин</button>
+          <div class="input-container hidden">
+            <input type="text" placeholder="Введите новый логин">
+            <button class="confirm-btn">Изменить</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="footer">
+  <p>© 2023 RenTool. Все права защищены.</p>
+</div>
+
+<script>
+  document.querySelectorAll(".action-item").forEach(item => {
+    const btn = item.querySelector(".action-btn");
+    const inputContainer = item.querySelector(".input-container");
+
+    btn.addEventListener("click", () => {
+      btn.style.display = "none";
+      inputContainer.classList.remove("hidden");
+    });
+
+    const confirmBtn = item.querySelector(".confirm-btn");
+    confirmBtn.addEventListener("click", async () => {
+      const inputs = inputContainer.querySelectorAll("input");
+      const values = Array.from(inputs).map(input => input.value.trim());
+
+      // Получаем userId из первого .info-value (ID)
+      const userId = document.querySelector('.user-info .info-item:nth-child(1) .info-value').textContent.trim();
+
+      let url = "";
+      let body = null;
+
+      if (btn.classList.contains("change-password")) {
+        if (!values[0]) {
+          alert("Введите новый пароль");
+          return;
+        }
+        url = `/api/user/replace/password/${userId}`;
+        body = { password: values[0] };
+
+        const response = await fetch(url, {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(body)
+        });
+
+        if (response.ok) {
+          alert("Пароль успешно изменен!");
+          location.reload();
+        } else {
+          alert("Ошибка при изменении пароля: " + response.statusText);
+          btn.style.display = "block";
+          inputContainer.classList.add("hidden");
+        }
+
+      } else if (btn.classList.contains("change-phone")) {
+        if (!values[0]) {
+          alert("Введите новый телефон");
+          return;
+        }
+        url = `/api/user/replace/phone/${userId}?phone=${encodeURIComponent(values[0])}`;
+
+        const response = await fetch(url, { method: "PATCH" });
+        if (response.ok) {
+          alert("Телефон успешно изменен!");
+          location.reload();
+        } else {
+          alert("Ошибка при изменении телефона: " + response.statusText);
+          btn.style.display = "block";
+          inputContainer.classList.add("hidden");
+        }
+
+      } else if (btn.classList.contains("change-email")) {
+        if (!values[0]) {
+          alert("Введите новый email");
+          return;
+        }
+        url = `/api/user/replace/email/${userId}?email=${encodeURIComponent(values[0])}`;
+
+        const response = await fetch(url, { method: "PATCH" });
+        if (response.ok) {
+          alert("Email успешно изменен!");
+          location.reload();
+        } else {
+          alert("Ошибка при изменении email: " + response.statusText);
+          btn.style.display = "block";
+          inputContainer.classList.add("hidden");
+        }
+
+      } else if (btn.classList.contains("change-name")) {
+        let success = true;
+
+        if (values[0] || values[1]) {
+          if (values[0]) {
+            const response1 = await fetch(`/api/user/replace/firstname/${userId}?firstName=${encodeURIComponent(values[0])}`, {
+              method: "PATCH"
+            });
+            if (!response1.ok) success = false;
+          }
+
+          if (values[1]) {
+            const response2 = await fetch(`/api/user/replace/lastname/${userId}?lastName=${encodeURIComponent(values[1])}`, {
+              method: "PATCH"
+            });
+            if (!response2.ok) success = false;
+          }
+
+          if (success) {
+            alert("Имя и/или фамилия успешно изменены!");
+            location.reload();
+          } else {
+            alert("Ошибка при изменении имени и фамилии");
+            btn.style.display = "block";
+            inputContainer.classList.add("hidden");
+          }
+        } else {
+          alert("Введите хотя бы одно значение для изменения");
+          btn.style.display = "block";
+          inputContainer.classList.add("hidden");
+        }
+
+      } else if (btn.classList.contains("change-username")) {
+        if (!values[0]) {
+          alert("Введите новый логин");
+          return;
+        }
+        url = `/api/user/replace/username/${userId}?username=${encodeURIComponent(values[0])}`;
+
+        const response = await fetch(url, { method: "PATCH" });
+        if (response.ok) {
+          alert("Логин успешно изменен!");
+          location.reload();
+        } else {
+          alert("Ошибка при изменении логина: " + response.statusText);
+          btn.style.display = "block";
+          inputContainer.classList.add("hidden");
+        }
+      }
+    });
+  });
+</script>
+</body>
+</html>

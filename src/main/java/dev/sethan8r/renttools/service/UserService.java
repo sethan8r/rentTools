@@ -30,15 +30,16 @@ public class UserService {
     @Transactional
     public void createUser(UserCreateDTO userCreateDTO) {
         if (userRepository.existsByUsername(userCreateDTO.username())) {
-            throw new AlreadyExistsException("Пользователь с логином " + userCreateDTO.username() + "существует");
+            System.out.println("ТУт");
+            throw new AlreadyExistsException("Пользователь с логином " + userCreateDTO.username() + " существует");
         }
 
         if (userRepository.existsByEmail(userCreateDTO.email())) {
-            throw new AlreadyExistsException("Пользователь с почтой " + userCreateDTO.email() + "существует");
+            throw new AlreadyExistsException("Пользователь с почтой " + userCreateDTO.email() + " существует");
         }
 
         if (userRepository.existsByPhone(userCreateDTO.phone())) {
-            throw new AlreadyExistsException("Пользователь с телефоном " + userCreateDTO.phone() + "существует");
+            throw new AlreadyExistsException("Пользователь с телефоном " + userCreateDTO.phone() + " существует");
         }
 
         User user = userMapper.toUser(userCreateDTO);
@@ -54,7 +55,7 @@ public class UserService {
                 () -> new NotFoundException("Пользователь с ID " + id + " не найден"));
 
         if (userRepository.existsByPhone(phone)) {
-            throw new AlreadyExistsException("Пользователь с телефоном " + phone + "существует");
+            throw new AlreadyExistsException("Пользователь с телефоном " + phone + " существует");
         }
 
         user.setPhone(phone);
@@ -94,7 +95,7 @@ public class UserService {
                 () -> new NotFoundException("Пользователь с ID " + id + " не найден"));
 
         if (userRepository.existsByEmail(email)) {
-            throw new AlreadyExistsException("Пользователь с почтой " + email + "существует");
+            throw new AlreadyExistsException("Пользователь с почтой " + email + " существует");
         }
 
         user.setEmail(email);
@@ -107,7 +108,7 @@ public class UserService {
                 () -> new NotFoundException("Пользователь с ID " + id + " не найден"));
 
         if (userRepository.existsByUsername(username)) {
-            throw new AlreadyExistsException("Пользователь с логином " + username + "существует");
+            throw new AlreadyExistsException("Пользователь с логином " + username + " существует");
         }
 
         user.setUsername(username);

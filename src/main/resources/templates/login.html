@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход в систему</title>
+    <style>
+        /* Ваши стили остаются без изменений */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            max-width: 450px;
+            overflow: hidden;
+        }
+
+        .header {
+            background: #4a90e2;
+            padding: 25px;
+            text-align: center;
+        }
+
+        .logo {
+            max-width: 120px;
+            height: auto;
+            margin-bottom: 15px;
+            border: 4px solid white;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            background: white;
+            padding: 8px;
+        }
+
+        h1 {
+            color: white;
+            font-size: 28px;
+            margin: 0;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .form-content {
+            padding: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input:focus {
+            border-color: #4a90e2;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+        }
+
+        .error {
+            color: #d9534f;
+            font-size: 14px;
+            margin-top: 5px;
+            display: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(to right, #4a90e2, #63b3ed);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 6px rgba(74, 144, 226, 0.2);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 10px rgba(74, 144, 226, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .additional-links {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .additional-links a {
+            color: #4a90e2;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .additional-links a:hover {
+            color: #3a7bc8;
+            text-decoration: underline;
+        }
+
+        #errorMessage {
+            background-color: #f2dede;
+            color: #a94442;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        #logoutMessage {
+            background-color: #dff0d8;
+            color: #3c763d;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #777;
+            font-size: 14px;
+            border-top: 1px solid #eee;
+        }
+
+        @media (max-width: 500px) {
+            .container {
+                border-radius: 10px;
+            }
+
+            .form-content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <img src="/RenTool.png" alt="Логотип RenTool" class="logo">
+        <h1>Вход в систему</h1>
+    </div>
+
+    <div class="form-content">
+        <form th:action="@{/login}" method="post" id="loginForm">
+            <div class="form-group">
+                <label for="username">Логин</label>
+                <input type="text" id="username" name="username" required>
+                <div class="error" id="usernameError"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Пароль</label>
+                <input type="password" id="password" name="password" required>
+                <div class="error" id="passwordError"></div>
+            </div>
+
+            <button type="submit">Войти</button>
+        </form>
+
+        <!-- Сообщение об ошибке -->
+        <div th:if="${param.error != null and param.error[0] == 'true'}"
+             id="errorMessage"
+             style="display: block;">
+            Неверный логин или пароль
+        </div>
+
+        <!-- Сообщение о выходе -->
+        <div th:if="${param.logout != null and param.logout[0] == 'true'}"
+             id="logoutMessage"
+             style="display: block; background-color: #dff0d8; color: #3c763d;">
+            Вы успешно вышли из системы
+        </div>
+
+        <div class="additional-links">
+            <p>Нет аккаунта? <a href="/registration">Зарегистрироваться</a></p>
+            <p><a href="/forgot-password">Забыли пароль?</a></p>
+        </div>
+    </div>
+
+    <div class="footer">
+        © 2023 RenTool. Все права защищены.
+    </div>
+</div>
+
+<script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+        // Скрыть предыдущие сообщения об ошибках
+        hideAllErrors();
+
+        // Скрыть серверные сообщения об ошибках
+        const errorMessage = document.getElementById('errorMessage');
+        const logoutMessage = document.getElementById('logoutMessage');
+        if (errorMessage) errorMessage.style.display = 'none';
+        if (logoutMessage) logoutMessage.style.display = 'none';
+
+        // Базовая валидация
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+
+        if (!username) {
+            showError('usernameError', 'Введите логин');
+            e.preventDefault();
+            return;
+        }
+
+        if (!password) {
+            showError('passwordError', 'Введите пароль');
+            e.preventDefault();
+            return;
+        }
+
+        // Форма будет отправлена на сервер для обработки Spring Security
+    });
+
+    function hideAllErrors() {
+        const errorElements = document.querySelectorAll('.error');
+        errorElements.forEach(el => {
+            el.style.display = 'none';
+        });
+    }
+
+    function showError(elementId, message) {
+        const errorElement = document.getElementById(elementId);
+        if (errorElement) {
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+    }
+
+    // Автоматически скрыть сообщения через 5 секунд
+    setTimeout(() => {
+        const errorMessage = document.getElementById('errorMessage');
+        const logoutMessage = document.getElementById('logoutMessage');
+        if (errorMessage) errorMessage.style.display = 'none';
+        if (logoutMessage) logoutMessage.style.display = 'none';
+    }, 5000);
+</script>
+</body>
+</html>

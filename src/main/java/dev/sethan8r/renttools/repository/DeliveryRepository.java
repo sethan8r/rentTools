@@ -13,6 +13,6 @@ public interface DeliveryRepository extends JpaRepository<Delivery, Long> {
     Optional<Delivery> findByOrderId(Long orderId);
     Page<Delivery> findByCourierId(Long courierId, Pageable pageable);
     Page<Delivery> findByStatus(DeliveryStatus status, Pageable pageable);
-    Page<Delivery> findByStatusAndCourierId(DeliveryStatus status, Long courierId, Pageable pageable);
+    Page<Delivery> findByStatusAndCourier_id(DeliveryStatus status, Long courier, Pageable pageable); //findByStatusAndCourierId - было изначально так
     boolean existsByOrderId(Long orderId);
 }

@@ -82,7 +82,7 @@ public class DeliveryService {
     public Page<DeliveryResponseDTO> getDeliveryByStatusAndCourierId(DeliveryStatus status, Long id, Pageable pageable) {
         if(!courierRepository.existsById(id)) throw new NotFoundException("Курьер с ID " + id + " не найден");
 
-        return deliveryRepository.findByStatusAndCourierId(status, id, pageable)
+        return deliveryRepository.findByStatusAndCourier_id(status, id, pageable) //findByStatusAndCourierId - было изначально так
                 .map(deliveryMapper::toDeliveryResponseDTO);
     }
 

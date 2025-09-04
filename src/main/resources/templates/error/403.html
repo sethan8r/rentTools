@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Доступ запрещен</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .error-container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 500px;
+            width: 100%;
+        }
+        .logo {
+            max-width: 120px;
+            height: auto;
+            margin-bottom: 15px;
+            border: 4px solid white;
+            border-radius: 50%;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            background: white;
+            padding: 8px;
+        }
+        h1 {
+            color: #dc3545;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+        .error-code {
+            font-weight: bold;
+            font-size: 18px;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+        .error-message {
+            color: #6c757d;
+            margin: 15px 0;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+        .home-link {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 12px 30px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+        .home-link:hover {
+            background: #0056b3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 123, 255, 0.3);
+        }
+    </style>
+</head>
+<body>
+<div class="error-container">
+    <!-- Логотип -->
+    <img th:src="@{/RenTool.png}" alt="Логотип RenTool" class="logo">
+
+    <h1>🚫 Доступ запрещен</h1>
+    <div class="error-code">403 FORBIDDEN</div>
+    <div class="error-message">У вас недостаточно прав для просмотра этой страницы</div>
+
+    <a href="/" class="home-link">На главную</a>
+    <a href="/login" class="home-link" style="margin-left: 10px;">Сменить пользователя</a>
+</div>
+</body>
+</html>

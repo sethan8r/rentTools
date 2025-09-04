@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление курьерами - RenTool</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: #2c3e50;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 60px;
+            margin-right: 2rem;
+            transition: transform 0.3s;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-right: 1.5rem;
+        }
+
+        .nav-links a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-buttons a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            margin-left: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .login-btn {
+            background-color: #4a90e2;
+        }
+
+        .login-btn:hover {
+            background-color: #3a7bc8;
+        }
+
+        .profile-btn {
+            background-color: #27ae60;
+        }
+
+        .profile-btn:hover {
+            background-color: #219653;
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .admin-btn {
+            background-color: #9b59b6;
+        }
+
+        .admin-btn:hover {
+            background-color: #8e44ad;
+        }
+
+        .container {
+            flex: 1;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .search-section {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .search-section h2 {
+            color: #4a90e2;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #4a90e2;
+        }
+
+        .search-methods {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .search-method {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            background-color: #ecf0f1;
+            transition: all 0.3s;
+        }
+
+        .search-method.active {
+            background-color: #4a90e2;
+            color: white;
+        }
+
+        .search-input {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .search-input input {
+            flex: 1;
+            padding: 0.8rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .search-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .search-btn:hover {
+            background: #219653;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .profile-header h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .profile-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .info-card {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 2rem;
+            transition: transform 0.3s;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .info-card h2 {
+            color: #4a90e2;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #4a90e2;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #555;
+        }
+
+        .info-value {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .actions-card {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 2rem;
+        }
+
+        .actions-card h2 {
+            color: #4a90e2;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #4a90e2;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .action-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            padding: 1rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+        }
+
+        .change-password { background-color: #4a90e2; }
+        .change-password:hover { background-color: #3a7bc8; }
+
+        .change-phone { background-color: #27ae60; }
+        .change-phone:hover { background-color: #219653; }
+
+        .change-email { background-color: #9b59b6; }
+        .change-email:hover { background-color: #8e44ad; }
+
+        .change-name { background-color: #f39c12; }
+        .change-name:hover { background-color: #e67e22; }
+
+        .change-username { background-color: #34495e; }
+        .change-username:hover { background-color: #2c3e50; }
+
+        .add-delivery { background-color: #2ecc71; }
+        .add-delivery:hover { background-color: #27ae60; }
+
+        .change-delivery { background-color: #e74c3c; }
+        .change-delivery:hover { background-color: #c0392b; }
+
+        .input-container {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .input-container input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+
+        .confirm-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .confirm-btn:hover {
+            background: #219653;
+        }
+
+        .footer {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: auto;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            .nav-left {
+                margin-bottom: 1rem;
+            }
+
+            .nav-links {
+                margin-bottom: 1rem;
+            }
+
+            .search-methods {
+                flex-direction: column;
+            }
+
+            .profile-content {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-left">
+        <a href="/">
+            <img src="/RenTool.png" alt="Логотип RenTool" class="logo">
+        </a>
+        <ul class="nav-links">
+            <li><a href="/admin" class="admin-btn">Админка</a></li>
+        </ul>
+    </div>
+    <div class="nav-right">
+        <div class="auth-buttons">
+            <a href="/login" class="login-btn" sec:authorize="!isAuthenticated()">Войти</a>
+            <a href="/profile" class="profile-btn" sec:authorize="isAuthenticated()">Профиль</a>
+            <a href="/logout" class="logout-btn" sec:authorize="isAuthenticated()">Выйти</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="profile-header">
+        <h1>Управление курьерами</h1>
+    </div>
+
+    <div class="search-section">
+        <h2>Поиск курьера</h2>
+        <div class="search-methods">
+            <button class="search-method active" data-method="id">По ID</button>
+            <button class="search-method" data-method="username">По логину</button>
+            <button class="search-method" data-method="phone">По телефону</button>
+        </div>
+        <div class="search-input">
+            <input type="text" id="search-input" placeholder="Введите ID курьера">
+            <button class="search-btn" id="search-btn">Найти</button>
+        </div>
+    </div>
+
+    <div class="profile-content" id="courier-info" style="display: none;">
+        <div class="info-card">
+            <h2>Информация о курьере</h2>
+            <div class="user-info">
+                <div class="info-item">
+                    <span class="info-label">ID:</span>
+                    <span class="info-value" id="courier-id">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Логин:</span>
+                    <span class="info-value" id="courier-username">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Имя:</span>
+                    <span class="info-value" id="courier-firstname">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Фамилия:</span>
+                    <span class="info-value" id="courier-lastname">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Телефон:</span>
+                    <span class="info-value" id="courier-phone">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Email:</span>
+                    <span class="info-value" id="courier-email">-</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Количество доставок:</span>
+                    <span class="info-value" id="courier-delivers">-</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions-card">
+            <h2>Управление курьером</h2>
+            <div class="action-buttons">
+
+                <div class="action-item">
+                    <button class="action-btn change-username">Сменить логин</button>
+                    <div class="input-container hidden">
+                        <input type="text" placeholder="Введите новый логин">
+                        <button class="confirm-btn">Изменить</button>
+                    </div>
+                </div>
+
+                <div class="action-item">
+                    <button class="action-btn change-phone">Сменить телефон</button>
+                    <div class="input-container hidden">
+                        <input type="text" placeholder="Введите новый телефон">
+                        <button class="confirm-btn">Изменить</button>
+                    </div>
+                </div>
+
+                <div class="action-item">
+                    <button class="action-btn change-email">Сменить email</button>
+                    <div class="input-container hidden">
+                        <input type="email" placeholder="Введите новый email">
+                        <button class="confirm-btn">Изменить</button>
+                    </div>
+                </div>
+
+                <div class="action-item">
+                    <button class="action-btn change-name">Сменить имя/фамилию</button>
+                    <div class="input-container hidden">
+                        <input type="text" placeholder="Введите новое имя">
+                        <input type="text" placeholder="Введите новую фамилию">
+                        <button class="confirm-btn">Изменить</button>
+                    </div>
+                </div>
+
+                <div class="action-item">
+                    <button class="action-btn add-delivery">Добавить доставку</button>
+                </div>
+
+                <div class="action-item">
+                    <button class="action-btn change-delivery">Изменить количество доставок</button>
+                    <div class="input-container hidden">
+                        <input type="number" placeholder="Введите новое количество">
+                        <button class="confirm-btn">Изменить</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    <p>© 2023 RenTool. Все права защищены.</p>
+</div>
+
+<script>
+    let currentCourierId = null;
+    let currentSearchMethod = 'id';
+
+    // Обработчики для переключения методов поиска
+    document.querySelectorAll('.search-method').forEach(button => {
+        button.addEventListener('click', () => {
+            document.querySelectorAll('.search-method').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+            currentSearchMethod = button.dataset.method;
+
+            const placeholderMap = {
+                'id': 'Введите ID курьера',
+                'username': 'Введите логин курьера',
+                'phone': 'Введите телефон курьера'
+            };
+
+            document.getElementById('search-input').placeholder = placeholderMap[currentSearchMethod];
+        });
+    });
+
+    // Обработчик поиска
+    document.getElementById('search-btn').addEventListener('click', async () => {
+        const searchValue = document.getElementById('search-input').value.trim();
+        if (!searchValue) {
+            alert('Введите значение для поиска');
+            return;
+        }
+
+        let url = '';
+        if (currentSearchMethod === 'id') {
+            url = `/api/courier/get/${searchValue}`;
+        } else if (currentSearchMethod === 'username') {
+            url = `/api/courier/get/username?username=${encodeURIComponent(searchValue)}`;
+        } else if (currentSearchMethod === 'phone') {
+            url = `/api/courier/get/phone?phone=${encodeURIComponent(searchValue)}`;
+        }
+
+        try {
+            const response = await fetch(url);
+            if (response.ok) {
+                const courier = await response.json();
+                displayCourierInfo(courier);
+            } else {
+                alert('Курьер не найден');
+            }
+        } catch (error) {
+            alert('Ошибка при поиске курьера');
+        }
+    });
+
+    // Отображение информации о курьере
+    function displayCourierInfo(courier) {
+        document.getElementById('courier-id').textContent = courier.id;
+        document.getElementById('courier-username').textContent = courier.username;
+        document.getElementById('courier-firstname').textContent = courier.firstName;
+        document.getElementById('courier-lastname').textContent = courier.lastName;
+        document.getElementById('courier-phone').textContent = courier.phone;
+        document.getElementById('courier-email').textContent = courier.email;
+        document.getElementById('courier-delivers').textContent = courier.delivers;
+
+        currentCourierId = courier.id;
+        document.getElementById('courier-info').style.display = 'grid';
+    }
+
+    // Обработчики для изменения данных
+    document.querySelectorAll(".action-item").forEach(item => {
+        const btn = item.querySelector(".action-btn");
+        const inputContainer = item.querySelector(".input-container");
+
+        if (btn && inputContainer) {
+            btn.addEventListener("click", () => {
+                btn.style.display = "none";
+                inputContainer.classList.remove("hidden");
+            });
+
+            const confirmBtn = item.querySelector(".confirm-btn");
+            confirmBtn.addEventListener("click", async () => {
+                const inputs = inputContainer.querySelectorAll("input");
+                const values = Array.from(inputs).map(input => input.value.trim());
+
+                if (!currentCourierId) {
+                    alert("Сначала найдите курьера");
+                    return;
+                }
+
+                let url = "";
+                let body = null;
+
+                if (btn.classList.contains("change-username")) {
+                    if (!values[0]) {
+                        alert("Введите новый логин");
+                        return;
+                    }
+                    url = `/api/courier/replace/username/${currentCourierId}?username=${encodeURIComponent(values[0])}`;
+
+                } else if (btn.classList.contains("change-phone")) {
+                    if (!values[0]) {
+                        alert("Введите новый телефон");
+                        return;
+                    }
+                    url = `/api/courier/replace/phone/${currentCourierId}?phone=${encodeURIComponent(values[0])}`;
+
+                } else if (btn.classList.contains("change-email")) {
+                    if (!values[0]) {
+                        alert("Введите новый email");
+                        return;
+                    }
+                    url = `/api/courier/replace/email/${currentCourierId}?email=${encodeURIComponent(values[0])}`;
+
+                } else if (btn.classList.contains("change-name")) {
+                    let success = true;
+                    let hasChanges = false;
+
+                    if (values[0]) {
+                        const response1 = await fetch(`/api/courier/replace/firstname/${currentCourierId}?firstName=${encodeURIComponent(values[0])}`, {
+                            method: "PATCH"
+                        });
+                        if (!response1.ok) success = false;
+                        hasChanges = true;
+                    }
+
+                    if (values[1]) {
+                        const response2 = await fetch(`/api/courier/replace/lastname/${currentCourierId}?lastName=${encodeURIComponent(values[1])}`, {
+                            method: "PATCH"
+                        });
+                        if (!response2.ok) success = false;
+                        hasChanges = true;
+                    }
+
+                    if (hasChanges && success) {
+                        alert("Имя и/или фамилия успешно изменены!");
+                        location.reload();
+                    } else if (!hasChanges) {
+                        alert("Введите хотя бы одно значение для изменения");
+                    } else {
+                        alert("Ошибка при изменении имени и фамилии");
+                    }
+                    return;
+
+                } else if (btn.classList.contains("change-delivery")) {
+                    if (!values[0]) {
+                        alert("Введите новое количество доставок");
+                        return;
+                    }
+                    url = `/api/courier/replace/delivery/${currentCourierId}?delivers=${encodeURIComponent(values[0])}`;
+                }
+
+                if (url) {
+                    const response = await fetch(url, { method: "PATCH" });
+                    if (response.ok) {
+                        alert("Данные успешно изменены!");
+                        location.reload();
+                    } else {
+                        alert("Ошибка при изменении данных");
+                    }
+                }
+            });
+        } else if (btn.classList.contains("add-delivery")) {
+            btn.addEventListener("click", async () => {
+                if (!currentCourierId) {
+                    alert("Сначала найдите курьера");
+                    return;
+                }
+
+                const response = await fetch(`/api/courier/delivers/add/${currentCourierId}`, {
+                    method: "PATCH"
+                });
+
+                if (response.ok) {
+                    alert("Доставка успешно добавлена!");
+                    location.reload();
+                } else {
+                    alert("Ошибка при добавлении доставки");
+                }
+            });
+        }
+    });
+</script>
+</body>
+</html>

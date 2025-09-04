@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RenTool - Инструмент</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: #2c3e50;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 60px;
+            margin-right: 2rem;
+            transition: transform 0.3s;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-right: 1.5rem;
+        }
+
+        .nav-links a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-buttons a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            margin-left: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .login-btn {
+            background-color: #4a90e2;
+        }
+
+        .login-btn:hover {
+            background-color: #3a7bc8;
+        }
+
+        .profile-btn {
+            background-color: #27ae60;
+        }
+
+        .profile-btn:hover {
+            background-color: #219653;
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .container {
+            flex: 1;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            color: #4a90e2;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: #3a7bc8;
+            text-decoration: underline;
+        }
+
+        .tool-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .tool-image-container {
+            flex: 1;
+            min-width: 300px;
+            max-width: 500px;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            border: 2px solid #eee;
+        }
+
+        .tool-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .tool-info {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .tool-name {
+            font-size: 2rem;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-weight: 700;
+        }
+
+        .tool-type {
+            color: #7f8c8d;
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            font-style: italic;
+        }
+
+        .tool-price {
+            font-size: 2.5rem;
+            color: #27ae60;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .tool-availability {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 2rem;
+        }
+
+        .available {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .unavailable {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .order-btn {
+            background-color: #4a90e2;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .order-btn:hover {
+            background-color: #3a7bc8;
+        }
+
+        .order-btn:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #7f8c8d;
+            margin: 3rem 0;
+        }
+
+        .error {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #e74c3c;
+            margin: 3rem 0;
+        }
+
+        .footer {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: auto;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            .nav-left {
+                margin-bottom: 1rem;
+            }
+
+            .nav-links {
+                margin-bottom: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .nav-links li {
+                margin: 0.5rem;
+            }
+
+            .tool-details {
+                flex-direction: column;
+            }
+
+            .tool-image-container {
+                width: 100%;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-left">
+        <a href="/">
+            <img src="/RenTool.png" alt="Логотип RenTool" class="logo">
+        </a>
+        <ul class="nav-links">
+            <li><a href="/catalog">Каталог</a></li>
+            <li><a href="/order/all">Заказы</a></li>
+            <li><a href="/about">О компании</a></li>
+        </ul>
+    </div>
+    <div class="nav-right">
+        <div class="auth-buttons">
+            <a href="/login" class="login-btn" sec:authorize="!isAuthenticated()">Войти</a>
+            <a href="/profile" class="profile-btn" sec:authorize="isAuthenticated()">Профиль</a>
+            <a href="/logout" class="logout-btn" sec:authorize="isAuthenticated()">Выйти</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <a href="/catalog" class="back-link">← Назад к каталогу</a>
+
+    <div id="tool-content">
+        <div class="loading">Загрузка информации о товаре...</div>
+    </div>
+</div>
+
+<div class="footer">
+    <p>© 2023 RenTool. Все права защищены.</p>
+</div>
+
+<script>
+    // Получаем ID товара из URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const toolId = urlParams.get('id');
+
+    // Загрузка информации о товаре
+    document.addEventListener('DOMContentLoaded', () => {
+        if (toolId) {
+            loadTool(toolId);
+        } else {
+            document.getElementById('tool-content').innerHTML = '<div class="error">Ошибка: не указан ID товара</div>';
+        }
+    });
+
+    // Загрузка данных о товаре
+    async function loadTool(id) {
+        try {
+            const response = await fetch(`/api/tool/get/${id}`);
+
+            if (response.ok) {
+                const tool = await response.json();
+                displayTool(tool);
+            } else if (response.status === 404) {
+                document.getElementById('tool-content').innerHTML = '<div class="error">Товар не найден</div>';
+            } else {
+                document.getElementById('tool-content').innerHTML = '<div class="error">Ошибка при загрузке товара</div>';
+            }
+        } catch (error) {
+            document.getElementById('tool-content').innerHTML = '<div class="error">Ошибка при загрузке товара</div>';
+        }
+    }
+
+    // Отображение информации о товаре
+    function displayTool(tool) {
+        const toolContent = document.getElementById('tool-content');
+
+        toolContent.innerHTML = `
+      <div class="tool-details">
+        <div class="tool-image-container">
+          <img src="${tool.picture.url}" alt="${tool.name}" class="tool-image" onerror="this.src='https://via.placeholder.com/800x800?text=Изображение+не+загружено'">
+        </div>
+        <div class="tool-info">
+          <div>
+            <h1 class="tool-name">${tool.name}</h1>
+            <p class="tool-type">Тип: ${tool.type}</p>
+            <p class="tool-price">${formatPrice(tool.price)} ₽</p>
+            <div class="tool-availability ${tool.isAvailable ? 'available' : 'unavailable'}">
+              ${tool.isAvailable ? 'В наличии' : 'Нет в наличии'}
+            </div>
+          </div>
+          ${tool.isAvailable ?
+            `<a href="/order/create?id=${tool.id}" class="order-btn">Оформить заказ</a>` :
+            `<button class="order-btn" disabled>Нет в наличии</button>`
+        }
+        </div>
+      </div>
+    `;
+    }
+
+    // Форматирование цены
+    function formatPrice(price) {
+        return new Intl.NumberFormat('ru-RU').format(price);
+    }
+</script>
+</body>
+</html>

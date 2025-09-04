@@ -8,7 +8,7 @@ import dev.sethan8r.renttools.model.Order;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring", uses = {OrderMapper.class})
+@Mapper(componentModel = "spring", uses = {OrderMapper.class, CourierMapper.class})
 public interface DeliveryMapper {
 
     @Mapping(target = "id", ignore = true)

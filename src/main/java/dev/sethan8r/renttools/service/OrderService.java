@@ -38,6 +38,7 @@ public class OrderService {
                 () -> new NotFoundException("Пользователь с ID " + orderCreatedDTO.userId() + " не найден"));
 
         Order order = orderMapper.toOrder(orderCreatedDTO, tool, user);
+        tool.setIsAvailable(false);
 
         long daysCount = ChronoUnit.DAYS.between(orderCreatedDTO.startDate(),
                 orderCreatedDTO.endDate()) + 1;
@@ -119,7 +120,9 @@ public class OrderService {
         Order order = orderRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Заказ с ID " + id + " не найден"));
         Delivery delivery = order.getDelivery();
+        Tool tool = order.getTool();
 
+        tool.setIsAvailable(true);
         order.setStatus(DeliveryStatus.COMPLETED);
         delivery.setStatus(DeliveryStatus.COMPLETED);
         orderRepository.save(order);

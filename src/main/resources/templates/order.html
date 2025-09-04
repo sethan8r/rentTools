@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RenTool - Заказ</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .navbar {
+            background-color: #2c3e50;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            height: 60px;
+            margin-right: 2rem;
+            transition: transform 0.3s;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+
+        .nav-links li {
+            margin-right: 1.5rem;
+        }
+
+        .nav-links a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 0.8rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .nav-links a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+        }
+
+        .auth-buttons a {
+            color: #ecf0f1;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            margin-left: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .login-btn {
+            background-color: #4a90e2;
+        }
+
+        .login-btn:hover {
+            background-color: #3a7bc8;
+        }
+
+        .profile-btn {
+            background-color: #27ae60;
+        }
+
+        .profile-btn:hover {
+            background-color: #219653;
+        }
+
+        .logout-btn {
+            background-color: #e74c3c;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .container {
+            flex: 1;
+            width: 100%;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-bottom: 1.5rem;
+            color: #4a90e2;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .back-link:hover {
+            color: #3a7bc8;
+            text-decoration: underline;
+        }
+
+        .page-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 3px solid #4a90e2;
+            display: inline-block;
+        }
+
+        .order-card {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f1f2f6;
+        }
+
+        .order-id {
+            font-size: 1.2rem;
+            color: #7f8c8d;
+            font-weight: 500;
+        }
+
+        .order-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background-color: #f39c12;
+            color: white;
+        }
+
+        .status-in-progress {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .status-delivered {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .status-completed {
+            background-color: #2ecc71;
+            color: white;
+        }
+
+        .status-failed {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .order-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+        }
+
+        .tool-section {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .tool-card {
+            display: flex;
+            gap: 1.5rem;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+
+        .tool-image-container {
+            width: 150px;
+            height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            border-radius: 8px;
+            border: 2px solid #eee;
+        }
+
+        .tool-image {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .tool-info {
+            flex: 1;
+        }
+
+        .tool-name {
+            font-size: 1.3rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .tool-type {
+            color: #7f8c8d;
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+
+        .tool-price {
+            font-size: 1.5rem;
+            color: #27ae60;
+            font-weight: 700;
+        }
+
+        .details-section {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .detail-card {
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+
+        .detail-label {
+            font-size: 0.9rem;
+            color: #7f8c8d;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            font-size: 1.2rem;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+
+        .user-detail {
+            font-size: 1rem;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .full-price {
+            font-size: 2rem;
+            color: #27ae60;
+            font-weight: 700;
+            text-align: center;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid #f1f2f6;
+        }
+
+        .loading {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #7f8c8d;
+            margin: 3rem 0;
+        }
+
+        .error {
+            text-align: center;
+            font-size: 1.5rem;
+            color: #e74c3c;
+            margin: 3rem 0;
+        }
+
+        .footer {
+            background-color: #2c3e50;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 1.5rem;
+            margin-top: auto;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                padding: 1rem;
+            }
+
+            .nav-left {
+                margin-bottom: 1rem;
+            }
+
+            .nav-links {
+                margin-bottom: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .nav-links li {
+                margin: 0.5rem;
+            }
+
+            .order-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+
+            .tool-card {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .tool-image-container {
+                width: 100%;
+                max-width: 200px;
+                margin: 0 auto;
+            }
+
+            .details-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-left">
+        <a href="/">
+            <img src="/RenTool.png" alt="Логотип RenTool" class="logo">
+        </a>
+        <ul class="nav-links">
+            <li><a href="/catalog">Каталог</a></li>
+            <li><a href="/order/all">Заказы</a></li>
+            <li><a href="/about">О компании</a></li>
+        </ul>
+    </div>
+    <div class="nav-right">
+        <div class="auth-buttons">
+            <a href="/login" class="login-btn" sec:authorize="!isAuthenticated()">Войти</a>
+            <a href="/profile" class="profile-btn" sec:authorize="isAuthenticated()">Профиль</a>
+            <a href="/logout" class="logout-btn" sec:authorize="isAuthenticated()">Выйти</a>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <a href="/order" class="back-link">← Назад к моим заказам</a>
+    <h1 class="page-title">Информация о заказе</h1>
+
+    <div id="order-content">
+        <div class="loading">Загрузка информации о заказе...</div>
+    </div>
+</div>
+
+<div class="footer">
+    <p>© 2023 RenTool. Все права защищены.</p>
+</div>
+
+<script>
+    // Получаем ID заказа из URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderId = urlParams.get('id');
+
+    // Загрузка информации о заказе
+    document.addEventListener('DOMContentLoaded', () => {
+        if (orderId) {
+            loadOrder(orderId);
+        } else {
+            document.getElementById('order-content').innerHTML = '<div class="error">Ошибка: не указан ID заказа</div>';
+        }
+    });
+
+    // Загрузка данных заказа
+    async function loadOrder(id) {
+        try {
+            const response = await fetch(`/api/order/get/${id}`);
+
+            if (response.ok) {
+                const order = await response.json();
+                displayOrder(order);
+            } else if (response.status === 404) {
+                document.getElementById('order-content').innerHTML = '<div class="error">Заказ не найден</div>';
+            } else {
+                document.getElementById('order-content').innerHTML = '<div class="error">Ошибка при загрузке заказа</div>';
+            }
+        } catch (error) {
+            document.getElementById('order-content').innerHTML = '<div class="error">Ошибка при загрузке заказа</div>';
+        }
+    }
+
+    // Отображение информации о заказе
+    function displayOrder(order) {
+        const orderContent = document.getElementById('order-content');
+
+        // Форматирование дат
+        const startDate = formatDate(order.startDate);
+        const endDate = formatDate(order.endDate);
+
+        // Получение класса статуса
+        const statusClass = getStatusClass(order.status);
+        const statusText = getStatusText(order.status);
+
+        // Расчет количества дней
+        const days = calculateDays(order.startDate, order.endDate);
+
+        orderContent.innerHTML = `
+      <div class="order-card">
+        <div class="order-header">
+          <div class="order-id">Заказ #${order.id}</div>
+          <div class="order-status ${statusClass}">${statusText}</div>
+        </div>
+
+        <div class="order-content">
+          <div class="tool-section">
+            <h2 class="section-title">Инструмент</h2>
+            <div class="tool-card">
+              <div class="tool-image-container">
+                <img src="${order.toolResponseDTO.picture.url}" alt="${order.toolResponseDTO.name}" class="tool-image" onerror="this.src='https://via.placeholder.com/800x800?text=Изображение+не+загружено'">
+              </div>
+              <div class="tool-info">
+                <h3 class="tool-name">${order.toolResponseDTO.name}</h3>
+                <p class="tool-type">Тип: ${order.toolResponseDTO.type}</p>
+                <p class="tool-price">${formatPrice(order.toolResponseDTO.price)} ₽/сутки</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="details-section">
+            <h2 class="section-title">Детали заказа</h2>
+            <div class="details-grid">
+              <div class="detail-card">
+                <div class="detail-label">Дата начала</div>
+                <div class="detail-value">${startDate}</div>
+              </div>
+
+              <div class="detail-card">
+                <div class="detail-label">Дата окончания</div>
+                <div class="detail-value">${endDate}</div>
+              </div>
+
+              <div class="detail-card">
+                <div class="detail-label">Количество дней</div>
+                <div class="detail-value">${days}</div>
+              </div>
+
+              <div class="detail-card">
+                <div class="detail-label">Адрес доставки</div>
+                <div class="detail-value">${order.address}</div>
+              </div>
+            </div>
+
+            <div class="detail-card">
+              <div class="detail-label">Клиент</div>
+              <div class="user-detail">${order.userResponseDTO.firstName} ${order.userResponseDTO.lastName}</div>
+              <div class="user-detail">${order.userResponseDTO.email}</div>
+              <div class="user-detail">${order.userResponseDTO.phone || 'Телефон не указан'}</div>
+            </div>
+
+            <div class="full-price">
+              Итого: ${formatPrice(order.fullPrice)} ₽
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+    }
+
+    // Получение класса для статуса
+    function getStatusClass(status) {
+        switch (status) {
+            case 'PENDING': return 'status-pending';
+            case 'IN_PROGRESS': return 'status-in-progress';
+            case 'DELIVERED': return 'status-delivered';
+            case 'COMPLETED': return 'status-completed';
+            case 'FAILED': return 'status-failed';
+            default: return 'status-pending';
+        }
+    }
+
+    // Получение текста для статуса
+    function getStatusText(status) {
+        switch (status) {
+            case 'PENDING': return 'Ожидает доставки';
+            case 'IN_PROGRESS': return 'В доставке';
+            case 'DELIVERED': return 'Доставлен';
+            case 'COMPLETED': return 'Завершен';
+            case 'FAILED': return 'Ошибка/Отмена';
+            default: return status;
+        }
+    }
+
+    // Форматирование даты (YYYY-MM-DD -> DD.MM.YYYY)
+    function formatDate(dateString) {
+        if (!dateString) return 'Не указана';
+        const [year, month, day] = dateString.split('-');
+        return `${day}.${month}.${year}`;
+    }
+
+    // Расчет количества дней аренды
+    function calculateDays(startDate, endDate) {
+        if (!startDate || !endDate) return 0;
+
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        const diffTime = Math.abs(end - start);
+        return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    }
+
+    // Форматирование цены
+    function formatPrice(price) {
+        return new Intl.NumberFormat('ru-RU').format(price);
+    }
+</script>
+</body>
+</html>

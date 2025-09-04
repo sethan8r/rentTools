@@ -33,7 +33,7 @@ public class OrderController {
 
     @GetMapping("/get/userId/{id}")
     public Page<OrderResponseDTO> getOrderByUserId(
-            @PathVariable Long id,@PageableDefault(size = 20, sort = "user") Pageable pageable) {
+            @PathVariable Long id,@PageableDefault(size = 20, sort = "status") Pageable pageable) {
 
         return orderService.getOrderByUserId(id, pageable);
     }
