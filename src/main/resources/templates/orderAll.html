@@ -428,7 +428,7 @@
                     <option value="startDate,desc">По дате (сначала новые)</option>
                     <option value="startDate,asc">По дате (сначала старые)</option>
                     <option value="fullPrice,desc">По цене (сначала дорогие)</option>
-                    <option value="fullPrice,asc">По цене (сначала дешевые)</option>
+                    <option value="fullPrice,asc">По цена (сначала дешевые)</option>
                     <option value="status,asc">По статусу (А-Я)</option>
                     <option value="status,desc">По статусу (Я-А)</option>
                 </select>
@@ -487,6 +487,9 @@
 </div>
 
 <script>
+    // Получаем ID текущего пользователя из Thymeleaf
+    const currentUserId = [[${currentUser.id}]];
+
     // Текущие параметры фильтрации
     let currentFilters = {
         sort: 'startDate,desc',
@@ -498,7 +501,6 @@
     // Общее количество страниц и элементов
     let totalPages = 0;
     let totalElements = 0;
-    let currentUserId = 1; // В реальном приложении будет получен из аутентификации
 
     // Загрузка заказов при загрузке страницы
     document.addEventListener('DOMContentLoaded', () => {
@@ -524,7 +526,7 @@
         ordersContent.innerHTML = '<div class="loading">Загрузка заказов...</div>';
 
         try {
-            // Формируем URL с параметрами
+            // Формируем URL с параметрами для текущего пользователя
             let url = `/api/order/get/userId/${currentUserId}?page=${currentFilters.page}&size=${currentFilters.size}&sort=${currentFilters.sort}`;
 
             // Добавляем фильтр по статусу, если выбран
@@ -576,20 +578,20 @@
             const statusText = getStatusText(order.status);
 
             orderRow.innerHTML = `
-        <div>
-          <img src="${order.toolResponseDTO.picture.url}" alt="${order.toolResponseDTO.name}" class="order-image" onerror="this.src='https://via.placeholder.com/100x100?text=Нет+фото'">
-        </div>
-        <div>
-          <div class="order-tool-name">${order.toolResponseDTO.name}</div>
-          <div class="order-tool-type">${order.toolResponseDTO.type}</div>
-        </div>
-        <div class="order-date">${startDate}</div>
-        <div class="order-date">${endDate}</div>
-        <div class="order-price">${formatPrice(order.fullPrice)} ₽</div>
-        <div>
-          <span class="order-status ${statusClass}">${statusText}</span>
-        </div>
-      `;
+                <div>
+                    <img src="${order.toolResponseDTO.picture.url}" alt="${order.toolResponseDTO.name}" class="order-image" onerror="this.src='https://via.placeholder.com/100x100?text=Нет+фото'">
+                </div>
+                <div>
+                    <div class="order-tool-name">${order.toolResponseDTO.name}</div>
+                    <div class="order-tool-type">${order.toolResponseDTO.type}</div>
+                </div>
+                <div class="order-date">${startDate}</div>
+                <div class="order-date">${endDate}</div>
+                <div class="order-price">${formatPrice(order.fullPrice)} ₽</div>
+                <div>
+                    <span class="order-status ${statusClass}">${statusText}</span>
+                </div>
+            `;
 
             ordersContent.appendChild(orderRow);
         });
